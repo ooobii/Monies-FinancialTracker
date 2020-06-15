@@ -6,31 +6,45 @@
 <div id="createAccount_form" style="display:none">
     @using( Html.BeginForm("Create", "BankAccounts", FormMethod.Post) ) {
         @Html.AntiForgeryToken()
-        <div class="row row-cols-1">
-            <div class="col">
-                <label for="name">Account Name:</label>
-            </div>
-            <div class="col pb-2 mb-2 border-bottom">
-                <input type="text" id="name" name="AccountName" placeholder="Type a name..." class="full-width" />
-            </div>
-            <div class="col">
-                <label for="startbal">Starting Balance:</label>
-            </div>
-            <div class="col pb-2 mb-2 border-bottom">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">$</span>
-                    </div>
-                    <input type="number" class="form-control" id="startbal" name="StartingBalance">
-                    <div class="input-group-append">
-                        <span class="input-group-text">.00</span>
-                    </div>
+    <div class="row row-cols-1">
+        <div class="col">
+            <label for="name">Account Name:</label>
+        </div>
+        <div class="col pb-2 mb-2 border-bottom">
+            <input type="text" id="name" name="AccountName" placeholder="Type a name..." class="full-width" />
+        </div>
+        <div class="col">
+            <label for="lowbal">Starting Balance:</label>
+        </div>
+        <div class="col pb-2 mb-2 border-bottom">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">$</span>
+                </div>
+                <input type="number" class="form-control" id="lowbal" name="LowBalanceAlertThreshold">
+                <div class="input-group-append">
+                    <span class="input-group-text">.00</span>
                 </div>
             </div>
-            <div class="col">
-                <button type="submit" class="btn btn-block btn-success">Create Household</button>
+        </div>
+        <div class="col">
+            <label for="lowbal">Low Balance Warning Amount:</label>
+        </div>
+        <div class="col pb-2 mb-2 border-bottom">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">$</span>
+                </div>
+                <input type="number" class="form-control" id="lowbal" name="LowBalanceAlertThreshold">
+                <div class="input-group-append">
+                    <span class="input-group-text">.00</span>
+                </div>
             </div>
         </div>
+        <div class="col">
+            <button type="submit" class="btn btn-block btn-success">Create Account</button>
+        </div>
+    </div>
     }
 </div>
 

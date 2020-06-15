@@ -6,7 +6,6 @@ namespace FinancialTracker_Web.Models
     {
         public int Id { get; set; }
 
-        [Required]
         public int ParentCategoryId { get; set; }
 
         [Required]

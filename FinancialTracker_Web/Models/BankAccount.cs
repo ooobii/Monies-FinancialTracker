@@ -7,11 +7,8 @@ namespace FinancialTracker_Web.Models
     public class BankAccount
     {
         public int Id { get; set; }
-        [Required]
         public string OwnerId { get; set; }
-        [Required]
         public int ParentHouseholdId { get; set; }
-        [Required]
         public int AccountTypeId { get; set; }
 
         [Required]

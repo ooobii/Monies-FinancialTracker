@@ -6,17 +6,9 @@ namespace FinancialTracker_Web.Models
     public class Transaction
     {
         public int Id { get; set; }
-
-        [Required]
         public int ParentAccountId { get; set; }
-
-        [Required]
         public int TransactionTypeId { get; set; }
-
         public int? CategoryItemId { get; set; }
-
-
-        [Required]
         public string OwnerId { get; set; }
 
         [MaxLength(45)]

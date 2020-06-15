@@ -44,7 +44,8 @@
         @if( Request.RawUrl != "/" ) {
             <div class="card-footer">
                 <div class="float-right">
-                    <a href="@Url.Action("Create", "BankAccounts")" class="btn btn-sm btn-outline-primary card-link">Create New Account</a>
+                    @*<a href="@Url.Action("Create", "BankAccounts")" class="btn btn-sm btn-outline-primary card-link">Create New Account</a>*@
+                    @Html.Partial("partials/buttons/_CreateBankAccountButton", Model)
                 </div>
             </div>
         }

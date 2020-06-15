@@ -7,7 +7,6 @@ namespace FinancialTracker_Web.Models
     {
         public int Id { get; set; }
 
-        [Required]
         public int ParentHouseholdId { get; set; }
 
         [Required]

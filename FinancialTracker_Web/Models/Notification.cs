@@ -7,7 +7,6 @@ namespace FinancialTracker_Web.Models
         public int Id { get; set; }
         public string Name { get; set; }
         
-        [Required]
         public string RecipientId { get; set; }
 
         [Required]
