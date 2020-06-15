@@ -479,11 +479,13 @@
     <Content Include="Scripts\popper.js.map" />
     <Content Include="Scripts\popper-utils.min.js.map" />
     <Content Include="Scripts\popper-utils.js.map" />
-    <Content Include="Views\Shared\partials\_IncomeCard.cshtml" />
-    <Content Include="Views\Shared\partials\_BankAccountsCard.cshtml" />
-    <Content Include="Views\Shared\partials\_ExpenseCard.cshtml" />
-    <Content Include="Views\Shared\partials\_CategoriesCard.cshtml" />
-    <Content Include="Views\Shared\partials\_TransactionsCard.cshtml" />
+    <Content Include="Views\Shared\partials\cards\_IncomeCard.cshtml" />
+    <Content Include="Views\Shared\partials\cards\_BankAccountsCard.cshtml" />
+    <Content Include="Views\Shared\partials\cards\_ExpenseCard.cshtml" />
+    <Content Include="Views\Shared\partials\cards\_CategoriesCard.cshtml" />
+    <Content Include="Views\Shared\partials\cards\_TransactionsCard.cshtml" />
+    <Content Include="Views\Shared\partials\buttons\_CreateHouseholdButton.cshtml" />
+    <Content Include="Views\Shared\partials\buttons\_CreateBankAccountButton.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

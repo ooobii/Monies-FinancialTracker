@@ -1,0 +1,35 @@
+﻿<button type="button" id="createHouse_btn" class="btn btn-lg btn-block btn-outline-primary">Create a New Household</button>
+<div id="createHouse_form" style="display:none">
+    @using( Html.BeginForm("Create", "Households", FormMethod.Post) ) {
+        @Html.AntiForgeryToken()
+    <div class="row row-cols-1">
+        <div class="col">
+            <label for="Name">Household Name:</label>
+        </div>
+        <div class="col pb-2 mb-2 border-bottom">
+            <input type="text" id="Name" name="Name" placeholder="Type a name..." class="full-width" />
+        </div>
+        <div class="col">
+            <label for="Greeting">Greeting:</label>
+        </div>
+        <div class="col pb-2 mb-2 border-bottom">
+            <textarea type="text" id="Greeting" name="Greeting" placeholder="Type a greeting..." class="full-width" rows="3"></textarea>
+        </div>
+        <div class="col">
+            <button type="submit" class="btn btn-block btn-success">Create Household</button>
+        </div>
+    </div>
+    }
+</div>
+
+
+<script>
+    $('#createHouse_btn').popover({
+        placement: 'bottom',
+        title: 'Create Household:',
+        title: 'Create Household:',
+        html: true,
+        sanitize: false,
+        content: $('#createHouse_form').html()
+    })
+</script>

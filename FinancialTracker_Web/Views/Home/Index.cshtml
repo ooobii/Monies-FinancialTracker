@@ -26,17 +26,17 @@
 
                         <div class="row row-cols-1">
                             <div class="col">
-                                @Html.Partial("partials/_BankAccountsCard", Model.Household)
+                                @Html.Partial("partials/cards/_BankAccountsCard", Model.Household)
                             </div>
                             <div class="col">
-                                @Html.Partial("partials/_CategoriesCard", Model.Household)
+                                @Html.Partial("partials/cards/_CategoriesCard", Model.Household)
                             </div>
                         </div>
                     </div>
 
                     <div class="card-footer">
                         <div class="float-right">
-                            <a href="@Url.Action("Details", "Households", new { id=Model.Household.Id })" class="btn btn-sm btn-outline-primary card-link">Go to Household</a>
+                            <a href="@Url.Action("Details", "Households")" class="btn btn-sm btn-outline-primary card-link">Go to Household</a>
                         </div>
                     </div>
                 </div>
@@ -53,7 +53,8 @@
 
                     <div class="card-footer">
                         <div class="float-right">
-                            <a class="btn btn-lg btn-block btn-outline-primary" href="@Url.Action("Create", "Households")">Create a New Household</a>
+                            @*<a class="btn btn-lg btn-block btn-outline-primary" href="@Url.Action("Create", "Households")">Create a New Household</a>*@
+                            @Html.Partial("partials/buttons/_CreateHouseholdButton")
                         </div>
                     </div>
                 </div>

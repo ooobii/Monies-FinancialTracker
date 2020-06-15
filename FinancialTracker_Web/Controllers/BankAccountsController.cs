@@ -54,7 +54,7 @@ namespace FinancialTracker_Web.Controllers
 
                 db.BankAccounts.Add(bankAccount);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", "Home");
             }
 
             ViewBag.AccountTypeId = new SelectList(db.BankAccountTypes, "Id", "AccountName", bankAccount.AccountTypeId);
@@ -87,7 +87,7 @@ namespace FinancialTracker_Web.Controllers
             if( ModelState.IsValid ) {
                 db.Entry(bankAccount).State = EntityState.Modified;
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", "Home");
             }
             ViewBag.AccountTypeId = new SelectList(db.BankAccountTypes, "Id", "AccountName", bankAccount.AccountTypeId);
             ViewBag.OwnerId = new SelectList(db.Users, "Id", "FirstName", bankAccount.OwnerId);
@@ -114,7 +114,7 @@ namespace FinancialTracker_Web.Controllers
             BankAccount bankAccount = db.BankAccounts.Find(id);
             db.BankAccounts.Remove(bankAccount);
             db.SaveChanges();
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Home");
         }
 
         protected override void Dispose(bool disposing) {
