@@ -1,24 +1,15 @@
-﻿body {
-    padding-top: 50px;
-    padding-bottom: 20px;
+﻿.small-label {
+    margin-bottom: 0;
+    font-size: .9rem;
+    text-decoration: underline;
 }
 
-/* Set padding to keep content from hitting the edges */
-.body-content {
-    padding-left: 15px;
-    padding-right: 15px;
+.balance-md {
+    font-size: 2rem;
+    text-align: center;
 }
 
-/* Override the default bootstrap behavior where horizontal description lists 
-   will truncate terms that are too long to fit in the left column 
-*/
-.dl-horizontal dt {
-    white-space: normal;
-}
-
-/* Set width on the form input elements since they're 100% wide by default */
-input,
-select,
-textarea {
-    max-width: 280px;
+.balance-lg {
+    font-size: 2.6rem;
+    text-align: center;
 }

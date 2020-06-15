@@ -1,34 +1,28 @@
 ﻿@model FinancialTracker_Web.Models.Household
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = $"{Model.Name}";
 }
 
-<h2>Details</h2>
-
-<div>
-    <h4>Household</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Greeting)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Greeting)
-        </dd>
-
-    </dl>
+<div class="jumbotron jumbotron-skinny">
+    <h1>@Model.Name Household</h1>
+    <p class="lead">@Model.Greeting</p>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+<div class="row row-cols-1">
+    <div class="col">
+        @Html.Partial("partials/_BankAccountsCard", Model)
+    </div>
+    <div class="col">
+        @Html.Partial("partials/_CategoriesCard", Model)
+    </div>
+</div>
+
+<div class="row pt-3 border-top">
+    <div class="col">
+
+        <p>
+            @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+            @Html.ActionLink("Back to List", "Index")
+        </p>
+    </div>
+</div>

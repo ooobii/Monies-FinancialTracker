@@ -1,0 +1,37 @@
+﻿@using FinancialTracker_Web.Models
+@model Household
+
+<div class="card">
+    <div class="card-header card-header-md bg-gradient-purple"><i class="fas fa-funnel-dollar mr-3"></i>Categories</div>
+    <div class="card-body">
+        @if( Model.Categories.Count > 0 ) {
+        <ul class="list-group">
+
+            @foreach( Category c in Model.Categories ) {
+            <li class="list-group-item">
+                @c.Name <small class="text-secondary">@c.Description</small>
+
+                @if( c.Items.Count > 0 ) {
+                <ul class="list-group mt-3">
+                    @foreach( CategoryItem ci in c.Items ) {
+                    <li class="list-group-item">@ci.Name <small class="text-secondary">@ci.Description</small></li>
+                                }
+                </ul>
+                        }
+            </li>
+                }
+        </ul>
+        } else {
+        <h5 class="text-center">No transaction categories yet!</h5>
+        }
+    </div>
+
+    @if( Request.RawUrl != "/" ) {
+    <div class="card-footer">
+        <div class="float-right">
+            <a href="@Url.Action("Create", "Categories", new {ParentHouseId = Model.Id})" class="btn btn-sm btn-outline-primary card-link">Create New Primary Category</a>
+            <a href="@Url.Action("Create", "CategoryItems", new {ParentHouseId = Model.Id})" class="btn btn-sm btn-outline-primary card-link">Create New Secondary Category</a>
+        </div>
+    </div>
+    }
+</div>

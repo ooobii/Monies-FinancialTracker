@@ -1,90 +1,49 @@
 ﻿@model FinancialTracker_Web.Models.BankAccount
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = $"Account: {Model.AccountName}";
 }
 
-<h2>Details</h2>
-
-<div>
-    <h4>BankAccount</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.AccountType.Name)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.AccountType.Name)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Bank.Name)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Bank.Name)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Owner.FirstName)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Owner.FirstName)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.ParentHousehold.Name)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.ParentHousehold.Name)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Created)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Created)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.StartingBalance)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.StartingBalance)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.CurrentBalance)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.CurrentBalance)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.LowBalanceAlertThreshold)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.LowBalanceAlertThreshold)
-        </dd>
-
-    </dl>
+<div class="jumbotron jumbotron-skinny bg-gradient-navy">
+    <h1>Account: @Model.AccountName</h1>
+    <p class="lead">View or edit transactions and account balance.</p>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+
+<div class="row">
+    <div class="col-3">
+        <div class="card">
+            <div class="card-header bg-gradient-green">Current Balance</div>
+            <div class="card-body">
+                <p class="balance-lg">@Model.CurrentBalance.ToString("$0.00")</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-9">
+        <div class="card">
+            <div class="card-header bg-gradient-info">Information</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <p class="small-label">Created By:</p>
+                        <p class="lead">@Model.Owner.GetFullName()</p>
+                    </div>
+                    <div class="col text-center">
+                        <p class="small-label">Created On:</p>
+                        <p class="lead">@Model.Created.ToString("MMM d, yyyy h:mm:ss tt")</p>
+                    </div>
+                    <div class="col text-right">
+                        <p class="small-label">Total Transactions</p>
+                        <p class="lead">@Model.Transactions.Count</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        @Html.Partial("partials/_TransactionsCard", Model)
+    </div>
+</div>

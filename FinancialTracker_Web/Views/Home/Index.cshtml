@@ -1,31 +1,81 @@
-﻿@{
+﻿@using FinancialTracker_Web.Models
+@using FinancialTracker_Web.Models.ViewModels
+
+@model HomeIndexViewModel
+
+@{
     ViewBag.Title = "Home Page";
 }
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+<div class="jumbotron jumbotron-skinny">
+    <h1>Welcome, @ApplicationUser.GetFromDb(User).GetFullName()</h1>
+    <p class="lead">Here you can view/create your household, see transactions, and balances.</p>
 </div>
 
-<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            @if( Model.Household != null ) {
+                <div class="card card-primary">
+                    <div class="card-header card-header-lg bg-gradient-blue">Your Household</div>
+
+                    <div class="card-body">
+                        <h4>@Model.Household.Name</h4>
+                        <p class="card-text">@Model.Household.Greeting</p>
+                        <hr />
+
+                        <div class="row row-cols-1">
+                            <div class="col">
+                                @Html.Partial("partials/_BankAccountsCard", Model.Household)
+                            </div>
+                            <div class="col">
+                                @Html.Partial("partials/_CategoriesCard", Model.Household)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="float-right">
+                            <a href="@Url.Action("Details", "Households", new { id=Model.Household.Id })" class="btn btn-sm btn-outline-primary card-link">Go to Household</a>
+                        </div>
+                    </div>
+                </div>
+
+            } else {
+                <div class="card card-primary">
+                    <div class="card-header card-header-lg bg-gradient-blue"> Households</div>
+
+                    <div class="card-body">
+                        <p class="card-text">
+                            Looks like you aren't a member of a household yet!
+                        </p>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="float-right">
+                            <a class="btn btn-lg btn-block btn-outline-primary" href="@Url.Action("Create", "Households")">Create a New Household</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="col-md-4">
+            <div class="card card-info">
+                <div class="card-header card-header-lg bg-gradient-cyan">Actions</div>
+
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <a href="#" class="btn btn-block btn-outline-primary card-link">Card link</a>
+                        </div>
+                    </div>
+                    <div class="row pt-2">
+                        <div class="col">
+                            <a href="#" class="btn btn-block btn-outline-primary card-link">Another link</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

@@ -1,0 +1,47 @@
+﻿@using FinancialTracker_Web.Models
+@model BankAccount
+
+<div class="card">
+    <div class="card-header card-header-md bg-gradient-darkgreen"><i class="fas fa-coins mr-3"></i>Income</div>
+    <div class="card-body">
+
+        @if( Model.Transactions.Count > 0 ) {
+            <table class="data-table">
+                <tr>
+                    <th>Memo</th>
+                    <th>Amount</th>
+                    <th>Spent By</th>
+                    <th>Actions</th>
+                </tr>
+                @foreach( Transaction t in Model.Transactions.Where(t => t.TransactionType.IsIncome == true) ) {
+                    <tr>
+                        <td>@t.Memo</td>
+                        <td>@t.Amount</td>
+                        <td>@t.Owner.GetShortName()</td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-info"
+                               href="@Html.Action("Details", "Transactions", new { id = t.Id })">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+
+                            <a class="btn btn-sm btn-outline-warning"
+                               href="@Html.Action("Details", "Transactions", new { id = t.Id })">
+                                <i class="fas fa-pencil-alt"></i>
+                            </a>
+                        </td>
+                    </tr>
+
+                }
+            </table>
+        } else {
+            <h5 class="text-center">No income yet! Feel free to <a href="@Url.Action("Create", "Transactions")">add some here</a></h5>
+        }
+    </div>
+    @if( Request.RawUrl != "/" ) {
+        <div class="card-footer">
+            <div class="float-right">
+                <a href="@Url.Action("Create", "Transactions", new {ParentHouseId = Model.Id})" class="btn btn-sm btn-outline-primary card-link">Create Transaction</a>
+            </div>
+        </div>
+    }
+</div>

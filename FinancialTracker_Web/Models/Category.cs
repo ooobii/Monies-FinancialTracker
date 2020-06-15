@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
 
 namespace FinancialTracker_Web.Models
 {
@@ -17,7 +14,6 @@ namespace FinancialTracker_Web.Models
 
         public virtual Household ParentHousehold { get; set; }
         public virtual ICollection<CategoryItem> Items { get; set; }
-
 
         public Category() {
             Items = new HashSet<CategoryItem>();

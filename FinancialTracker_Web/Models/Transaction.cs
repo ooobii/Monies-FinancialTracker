@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace FinancialTracker_Web.Models
 {
@@ -17,11 +14,13 @@ namespace FinancialTracker_Web.Models
         public decimal Amount { get; set; }
         public DateTime CreatedAt { get; set; }
 
+        public decimal GetAmount() {
+            if( this.TransactionType.IsIncome ) { return Amount; } else { return Amount * -1; }
+        }
 
         public virtual BankAccount ParentAccount { get; set; }
         public virtual TransactionType TransactionType { get; set; }
         public virtual CategoryItem CategoryItem { get; set; }
         public virtual ApplicationUser Owner { get; set; }
-
     }
 }
