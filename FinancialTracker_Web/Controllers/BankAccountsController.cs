@@ -45,22 +45,21 @@ namespace FinancialTracker_Web.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "AccountTypeId,AccountName,StartingBalance,LowBalanceAlertThreshold")] BankAccount bankAccount) {
+        public ActionResult Create([Bind(Include = "OwnerId,ParentHouseholdId,AccountTypeId,AccountName,StartingBalance,LowBalanceAlertThreshold")] BankAccount bankAccount, string returnUrl) {
+            bankAccount.Created = DateTime.Now;
+            bankAccount.CurrentBalance = bankAccount.StartingBalance;
             if( ModelState.IsValid ) {
-                bankAccount.Created = DateTime.Now;
-                bankAccount.OwnerId = User.Identity.GetUserId();
-                bankAccount.ParentHouseholdId = ApplicationUser.GetParentHouseholdId(User, db);
-                bankAccount.CurrentBalance = bankAccount.StartingBalance;
 
                 db.BankAccounts.Add(bankAccount);
                 db.SaveChanges();
-                return RedirectToAction("Index", "Home");
+                return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
+                
             }
 
             ViewBag.AccountTypeId = new SelectList(db.BankAccountTypes, "Id", "AccountName", bankAccount.AccountTypeId);
             ViewBag.OwnerId = new SelectList(db.Users, "Id", "FirstName", bankAccount.OwnerId);
             ViewBag.ParentHouseholdId = new SelectList(db.Households, "Id", "AccountName", bankAccount.ParentHouseholdId);
-            return View(bankAccount);
+            return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
 
         // GET: BankAccounts/Edit/5
@@ -123,5 +122,18 @@ namespace FinancialTracker_Web.Controllers
             }
             base.Dispose(disposing);
         }
+
+
+
+
+        #region Helpers 
+        private ActionResult RedirectToLocal(string returnUrl, ActionResult fallback = null) {
+            if( Url.IsLocalUrl(returnUrl) ) {
+                return Redirect(returnUrl);
+            }
+            return fallback ?? RedirectToAction("Index", "Home");
+        }
+        #endregion
+
     }
 }

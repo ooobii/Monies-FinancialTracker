@@ -21,7 +21,7 @@ namespace FinancialTracker_Web.Models
         public DateTime RecordedAt { get; set; }
 
         [Required]
-        public DateTime OccuredAt { get; set; }
+        public DateTime CreatedAt { get; set; }
 
 
         public decimal GetAmount() {

@@ -1,58 +1,73 @@
 ﻿@using FinancialTracker_Web.Models
+@using Microsoft.AspNet.Identity
 @{
-    var db = new AppDbContext();
+    var accTypes = new AppDbContext().BankAccountTypes.ToDictionary(t => t.Id, t => t.Name);
 }
-<button type="button" id="createAccount_btn" class="btn btn-lg btn-block btn-outline-primary">Create a New Household</button>
+<button type="button" id="createAccount_btn" class="btn btn-sm btn-outline-primary">Create New Bank Account</button>
 <div id="createAccount_form" style="display:none">
     @using( Html.BeginForm("Create", "BankAccounts", FormMethod.Post) ) {
         @Html.AntiForgeryToken()
-    <div class="row row-cols-1">
-        <div class="col">
-            <label for="name">Account Name:</label>
-        </div>
-        <div class="col pb-2 mb-2 border-bottom">
-            <input type="text" id="name" name="AccountName" placeholder="Type a name..." class="full-width" />
-        </div>
-        <div class="col">
-            <label for="lowbal">Starting Balance:</label>
-        </div>
-        <div class="col pb-2 mb-2 border-bottom">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">$</span>
-                </div>
-                <input type="number" class="form-control" id="lowbal" name="LowBalanceAlertThreshold">
-                <div class="input-group-append">
-                    <span class="input-group-text">.00</span>
+        @Html.Hidden("returnUrl", Request.RawUrl)
+        @Html.Hidden("OwnerId", User.Identity.GetUserId())
+        @Html.Hidden("ParentHouseholdId", ApplicationUser.GetParentHouseholdId(User))
+        
+        <div class="row row-cols-1">
+            <div class="col">
+                <label for="name">Account Name:</label>
+            </div>
+            <div class="col pb-2 mb-2 border-bottom">
+                <input type="text" id="name" name="AccountName" placeholder="Type a name..." class="full-width" />
+            </div>
+            <div class="col">
+                <label for="accType">Type:</label>
+            </div>
+            <div class="col pb-2 mb-2 border-bottom">
+                <select class="custom-select text-sm" id="accType" name="AccountTypeId">
+                    @foreach(KeyValuePair<int, string> bat in accTypes) {
+                        <option value="@bat.Key">@bat.Value</option>
+                    }
+                </select>
+            </div>
+            <div class="col">
+                <label for="lowbal">Starting Balance:</label>
+            </div>
+            <div class="col pb-2 mb-2 border-bottom">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">$</span>
+                    </div>
+                    <input type="number" class="form-control" id="lowbal" name="LowBalanceAlertThreshold">
+                    <div class="input-group-append">
+                        <span class="input-group-text">.00</span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col">
-            <label for="lowbal">Low Balance Warning Amount:</label>
-        </div>
-        <div class="col pb-2 mb-2 border-bottom">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">$</span>
-                </div>
-                <input type="number" class="form-control" id="lowbal" name="LowBalanceAlertThreshold">
-                <div class="input-group-append">
-                    <span class="input-group-text">.00</span>
+            <div class="col">
+                <label for="lowbal">Low Balance Warning Amount:</label>
+            </div>
+            <div class="col pb-2 mb-2 border-bottom">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">$</span>
+                    </div>
+                    <input type="number" class="form-control" id="lowbal" name="LowBalanceAlertThreshold">
+                    <div class="input-group-append">
+                        <span class="input-group-text">.00</span>
+                    </div>
                 </div>
             </div>
+            <div class="col">
+                <button type="submit" class="btn btn-block btn-success">Create Account</button>
+            </div>
         </div>
-        <div class="col">
-            <button type="submit" class="btn btn-block btn-success">Create Account</button>
-        </div>
-    </div>
     }
 </div>
 
 
 <script>
-    $('#createAccount').popover({
-        placement: 'bottom',
-        title: 'New Bank Account:',
+    $('#createAccount_btn').popover({
+        placement: 'left',
+        title: 'Add New Account:',
         html: true,
         sanitize: false,
         content: $('#createAccount_form').html()

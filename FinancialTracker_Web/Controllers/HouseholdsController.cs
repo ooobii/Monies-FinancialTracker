@@ -36,11 +36,10 @@ namespace FinancialTracker_Web.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Name,Greeting")] Household household) {
+        public ActionResult Create([Bind(Include = "Name,Greeting,CreatorId")] Household household) {
+            household.CreatedAt = DateTime.Now;
             if( ModelState.IsValid ) {
                 household.Members.Add(ApplicationUser.GetFromDb(User, db));
-                household.CreatorId = User.Identity.GetUserId();
-                household.CreatedAt = DateTime.Now;
 
                 db.Households.Add(household);
                 db.SaveChanges();

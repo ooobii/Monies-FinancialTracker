@@ -1,7 +1,9 @@
-﻿<button type="button" id="createHouse_btn" class="btn btn-lg btn-block btn-outline-primary">Create a New Household</button>
+﻿@using Microsoft.AspNet.Identity
+<button type="button" id="createHouse_btn" class="btn btn-lg btn-block btn-outline-primary">Create a New Household</button>
 <div id="createHouse_form" style="display:none">
     @using( Html.BeginForm("Create", "Households", FormMethod.Post) ) {
         @Html.AntiForgeryToken()
+        @Html.Hidden("CreatorId", User.Identity.GetUserId())
     <div class="row row-cols-1">
         <div class="col">
             <label for="Name">Household Name:</label>
@@ -25,8 +27,7 @@
 
 <script>
     $('#createHouse_btn').popover({
-        placement: 'bottom',
-        title: 'Create Household:',
+        placement: 'left',
         title: 'Create Household:',
         html: true,
         sanitize: false,
