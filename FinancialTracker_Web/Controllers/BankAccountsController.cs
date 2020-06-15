@@ -8,15 +8,11 @@ using System.Web.Mvc;
 
 namespace FinancialTracker_Web.Controllers
 {
+    [Authorize]
     public class BankAccountsController : Controller
     {
         private AppDbContext db = new AppDbContext();
 
-        // GET: BankAccounts
-        public ActionResult Index() {
-            var bankAccounts = db.BankAccounts.Include(b => b.AccountType).Include(b => b.Owner).Include(b => b.ParentHousehold);
-            return View(bankAccounts.ToList());
-        }
 
         // GET: BankAccounts/Details/5
         public ActionResult Details(int? id) {
@@ -30,51 +26,22 @@ namespace FinancialTracker_Web.Controllers
             return View(bankAccount);
         }
 
-        // GET: BankAccounts/Create
-        public ActionResult Create() {
-            if( ApplicationUser.GetParentHousehold(User) == null ) { return RedirectToAction("Index", "Home"); }
-
-            ViewBag.AccountTypeId = new SelectList(db.BankAccountTypes, "Id", "Name");
-            ViewBag.OwnerId = new SelectList(db.Users, "Id", "FirstName");
-            ViewBag.ParentHouseholdId = new SelectList(db.Households, "Id", "Name");
-            return View();
-        }
-
         // POST: BankAccounts/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "OwnerId,ParentHouseholdId,AccountTypeId,AccountName,StartingBalance,LowBalanceAlertThreshold")] BankAccount bankAccount, string returnUrl) {
-            bankAccount.Created = DateTime.Now;
+            bankAccount.CreatedAt = DateTime.Now;
             bankAccount.CurrentBalance = bankAccount.StartingBalance;
             if( ModelState.IsValid ) {
 
                 db.BankAccounts.Add(bankAccount);
                 db.SaveChanges();
                 return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
-                
-            }
 
-            ViewBag.AccountTypeId = new SelectList(db.BankAccountTypes, "Id", "AccountName", bankAccount.AccountTypeId);
-            ViewBag.OwnerId = new SelectList(db.Users, "Id", "FirstName", bankAccount.OwnerId);
-            ViewBag.ParentHouseholdId = new SelectList(db.Households, "Id", "AccountName", bankAccount.ParentHouseholdId);
+            }
             return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
-        }
-
-        // GET: BankAccounts/Edit/5
-        public ActionResult Edit(int? id) {
-            if( id == null ) {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            BankAccount bankAccount = db.BankAccounts.Find(id);
-            if( bankAccount == null ) {
-                return HttpNotFound();
-            }
-            ViewBag.AccountTypeId = new SelectList(db.BankAccountTypes, "Id", "AccountName", bankAccount.AccountTypeId);
-            ViewBag.OwnerId = new SelectList(db.Users, "Id", "FirstName", bankAccount.OwnerId);
-            ViewBag.ParentHouseholdId = new SelectList(db.Households, "Id", "AccountName", bankAccount.ParentHouseholdId);
-            return View(bankAccount);
         }
 
         // POST: BankAccounts/Edit/5
@@ -82,38 +49,29 @@ namespace FinancialTracker_Web.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,OwnerId,ParentHouseholdId,AccountTypeId,BankId,AccountName,Created,StartingBalance,CurrentBalance,LowBalanceAlertThreshold")] BankAccount bankAccount) {
+        public ActionResult Edit(EditBankAccountModel model, string returnUrl) {
             if( ModelState.IsValid ) {
-                db.Entry(bankAccount).State = EntityState.Modified;
+                var bankAccount = db.BankAccounts.First(ba => ba.Id == model.Id);
+                bankAccount.AccountName = model.AccountName;
+                bankAccount.AccountTypeId = model.AccountTypeId;
+                bankAccount.LowBalanceAlertThreshold = model.LowBalanceAlertThreshold;
                 db.SaveChanges();
-                return RedirectToAction("Index", "Home");
+                return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
             }
-            ViewBag.AccountTypeId = new SelectList(db.BankAccountTypes, "Id", "AccountName", bankAccount.AccountTypeId);
-            ViewBag.OwnerId = new SelectList(db.Users, "Id", "FirstName", bankAccount.OwnerId);
-            ViewBag.ParentHouseholdId = new SelectList(db.Households, "Id", "AccountName", bankAccount.ParentHouseholdId);
-            return View(bankAccount);
-        }
-
-        // GET: BankAccounts/Delete/5
-        public ActionResult Delete(int? id) {
-            if( id == null ) {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            BankAccount bankAccount = db.BankAccounts.Find(id);
-            if( bankAccount == null ) {
-                return HttpNotFound();
-            }
-            return View(bankAccount);
+            return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
 
         // POST: BankAccounts/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id) {
+        public ActionResult Delete(int id, string returnUrl) {
             BankAccount bankAccount = db.BankAccounts.Find(id);
-            db.BankAccounts.Remove(bankAccount);
-            db.SaveChanges();
-            return RedirectToAction("Index", "Home");
+            if(bankAccount.OwnerId == User.Identity.GetUserId()) {
+                db.BankAccounts.Remove(bankAccount);
+                db.SaveChanges();
+                return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
+            }
+            return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
 
         protected override void Dispose(bool disposing) {

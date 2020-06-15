@@ -14,25 +14,23 @@
                             <th>Account Name</th>
                             <th>Type</th>
                             <th>Balance</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach( BankAccount acc in Model.BankAccounts ) {
                             <tr>
-                                <td>@acc.AccountName</td>
-                                <td>@acc.AccountType.Name</td>
-                                <td>@acc.CurrentBalance</td>
                                 <td>
-                                    <a class="btn btn-sm btn-outline-info" href="@Url.Action("Details", "BankAccounts", new { id = acc.Id })">
-                                        <i class="fas fa-eye"></i>
+                                    <a class="pr-3" href="@Url.Action("Details", "BankAccounts", new { id = acc.Id })">
+                                        @acc.AccountName
                                     </a>
-                                    @if(acc.OwnerId == User.Identity.GetUserId()) {
-                                        <a class="btn btn-sm btn-outline-danger" href="@Url.Action("Delete", "BankAccounts", new { id = acc.Id })">
-                                            <i class="fas fa-times"></i>
-                                        </a>
+                                    
+                                    @if( acc.OwnerId == User.Identity.GetUserId() ) {
+                                        @Html.Partial("partials/buttons/_BankAccountEditButton", acc)
+                                        @Html.Partial("partials/buttons/_BankAccountDeleteButton", acc)
                                     }
                                 </td>
+                                <td>@acc.AccountType.Name</td>
+                                <td>@acc.CurrentBalance</td>
                             </tr>
                         }
                     </tbody>
@@ -45,7 +43,7 @@
             <div class="card-footer">
                 <div class="float-right">
                     @*<a href="@Url.Action("Create", "BankAccounts")" class="btn btn-sm btn-outline-primary card-link">Create New Account</a>*@
-                    @Html.Partial("partials/buttons/_CreateBankAccountButton", Model)
+                    @Html.Partial("partials/buttons/_BankAccountCreateButton", Model)
                 </div>
             </div>
         }

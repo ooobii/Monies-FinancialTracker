@@ -1,0 +1,59 @@
+﻿@using FinancialTracker_Web.Models
+@using Microsoft.AspNet.Identity
+
+@model BankAccount
+@{
+    var accTypes = new AppDbContext().BankAccountTypes.ToDictionary(t => t.Id, t => t.Name);
+}
+<button type="button" id="editAccount_btn" class="btn btn-sm btn-outline-primary btn-popover"><i class="fas fa-pencil-alt"></i></button>
+<div id="editAccount_form" style="display:none">
+    @using( Html.BeginForm("Edit", "BankAccounts", FormMethod.Post) ) {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("Id", Model.Id)
+        @Html.Hidden("returnUrl", Request.RawUrl)
+
+        <div class="row row-cols-1">
+            <div class="col">
+                <label for="name">Account Name:</label>
+            </div>
+            <div class="col pb-2 mb-2 border-bottom">
+                <input type="text" id="name" name="AccountName" placeholder="Type a name..." class="full-width" value="@Model.AccountName"/>
+            </div>
+            <div class="col">
+                <label for="accType">Type:</label>
+            </div>
+            <div class="col pb-2 mb-2 border-bottom">
+                <select class="custom-select text-sm" id="accType" name="AccountTypeId">
+                    @foreach( KeyValuePair<int, string> bat in accTypes ) {
+                        <option value="@bat.Key" @(bat.Key == Model.AccountTypeId ? Html.Raw("selected") : Html.Raw(""))>@bat.Value</option>
+                    }
+                </select>
+            </div>
+            <div class="col">
+                <label for="lowbal">Low Balance Warning Amount:</label>
+            </div>
+            <div class="col pb-2 mb-2 border-bottom">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">$</span>
+                    </div>
+                    <input type="number" class="form-control text-right" id="lowbal" name="LowBalanceAlertThreshold" value="@Model.LowBalanceAlertThreshold">
+                </div>
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-block btn-warning">Submit Changes</button>
+            </div>
+        </div>
+    }
+</div>
+
+
+<script>
+    $('#editAccount_btn').popover({
+        placement: 'bottom',
+        title: 'Edit Account "@Model.AccountName":',
+        html: true,
+        sanitize: false,
+        content: $('#editAccount_form').html()
+    });
+</script>

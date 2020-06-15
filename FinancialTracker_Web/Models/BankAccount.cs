@@ -14,7 +14,9 @@ namespace FinancialTracker_Web.Models
         [Required]
         public string AccountName { get; set; }
         [Required]
-        public DateTime Created { get; set; }
+        public DateTime CreatedAt { get; set; }
+        
+        public DateTime? ModifiedAt { get; set; }
 
 
         [Required]
