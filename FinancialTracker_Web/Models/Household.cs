@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace FinancialTracker_Web.Models
 {
@@ -7,10 +8,20 @@ namespace FinancialTracker_Web.Models
     {
         public int Id { get; set; }
 
+        [Required]
+        [MinLength(2)]
+        [MaxLength(25)]
         public string Name { get; set; }
+
+
+        [Required]
+        [MaxLength(255)]
         public string Greeting { get; set; }
+
+        [Required]
         public DateTime CreatedAt { get; set; }
 
+        [Required]
         public string CreatorId { get; set; }
 
         public ApplicationUser GetCreator(AppDbContext context = null) {

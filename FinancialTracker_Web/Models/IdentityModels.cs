@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
@@ -8,11 +9,17 @@ using System.Threading.Tasks;
 namespace FinancialTracker_Web.Models
 {
     // You can add profile data for the user by adding more properties to your ApplicationUser class, please visit https://go.microsoft.com/fwlink/?LinkID=317594 to learn more.
-    public class ApplicationUser : IdentityUser
-    {
+    public class ApplicationUser : IdentityUser {
+        [Required]
+        [MinLength(2)]
+        [MaxLength(25)]
         public string FirstName { get; set; }
+
+        [Required]
+        [MinLength(2)]
+        [MaxLength(25)]
         public string LastName { get; set; }
-        public string DisplayName { get; set; }
+
         public string AvatarImagePath { get; set; }
 
         public int? HouseholdId { get; set; }
@@ -21,19 +28,12 @@ namespace FinancialTracker_Web.Models
 
         public ICollection<BankAccount> Accounts { get; set; }
 
+
         public string GetShortName() {
             return this.LastName.Length > 0 ? $"{this.FirstName} {this.LastName.Substring(0, 1)}" : $"{this.FirstName}";
         }
-
         public string GetFullName() {
             return this.FirstName + " " + this.LastName;
-        }
-
-        public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager) {
-            // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType
-            var userIdentity = await manager.CreateIdentityAsync(this, DefaultAuthenticationTypes.ApplicationCookie);
-            // Add custom user claims here
-            return userIdentity;
         }
 
         public static ApplicationUser GetFromDb(IPrincipal user, AppDbContext context = null) {
@@ -41,7 +41,6 @@ namespace FinancialTracker_Web.Models
 
             return context.Users.Find(user.Identity.GetUserId());
         }
-
         public static ApplicationUser GetFromDb(string id, AppDbContext context = null) {
             if( context == null ) { context = new AppDbContext(); }
 
@@ -53,7 +52,6 @@ namespace FinancialTracker_Web.Models
 
             return context.Users.Find(user.Identity.GetUserId()).Household;
         }
-
         public static Household GetParentHousehold(string id, AppDbContext context = null) {
             if( context == null ) { context = new AppDbContext(); }
 
@@ -65,11 +63,18 @@ namespace FinancialTracker_Web.Models
 
             return context.Users.Find(user.Identity.GetUserId()).Household.Id;
         }
-
         public static int GetParentHouseholdId(string id, AppDbContext context = null) {
             if( context == null ) { context = new AppDbContext(); }
 
             return context.Users.Find(id).Household.Id;
+        }
+
+
+        public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager) {
+            // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType
+            var userIdentity = await manager.CreateIdentityAsync(this, DefaultAuthenticationTypes.ApplicationCookie);
+            // Add custom user claims here
+            return userIdentity;
         }
     }
 

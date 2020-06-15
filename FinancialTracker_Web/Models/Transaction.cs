@@ -1,18 +1,36 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace FinancialTracker_Web.Models
 {
     public class Transaction
     {
         public int Id { get; set; }
+
+        [Required]
         public int ParentAccountId { get; set; }
+
+        [Required]
         public int TransactionTypeId { get; set; }
+
         public int? CategoryItemId { get; set; }
+
+
+        [Required]
         public string OwnerId { get; set; }
 
+        [MaxLength(45)]
         public string Memo { get; set; }
+
+        [Required]
         public decimal Amount { get; set; }
-        public DateTime CreatedAt { get; set; }
+
+        [Required]
+        public DateTime RecordedAt { get; set; }
+
+        [Required]
+        public DateTime OccuredAt { get; set; }
+
 
         public decimal GetAmount() {
             if( this.TransactionType.IsIncome ) { return Amount; } else { return Amount * -1; }
