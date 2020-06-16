@@ -9,12 +9,34 @@
 
                 @foreach( Category c in Model.Categories ) {
                     <li class="list-group-item">
-                        <span class="category-name">@c.Name</span> <small class="category-desc">@c.Description</small>
+                        <span class="category-name">@c.Name</span> <span class="category-desc">@c.Description</span>
 
-                        @if( c.Items.Count > 0 ) {
+                        @if( Request.RawUrl != "/" ) {
+                            <span class="float-right">
+                                <span class="float-right pl-3">
+                                    <text class="text-sm">@($"{c.GetThisMonthTotalBudgetUsage():P2}") spent</text>
+                                </span>
+                                @Html.Partial("partials/buttons/_CategoryEditButton", c)
+                                @Html.Partial("partials/buttons/_CategoryDeleteButton", c)
+                                @Html.Partial("partials/buttons/_CategoryItemCreateButton", c)
+                            </span>
+                        }
+
+                        @if( c.CategoryItems.Count > 0 ) {
                             <ul class="list-group mt-3">
-                                @foreach( CategoryItem ci in c.Items ) {
-                                    <li class="subcategory-name">@ci.Name <small class="subcategory-desc">@ci.Description</small></li>
+                                @foreach( CategoryItem ci in c.CategoryItems ) {
+                                    <li class="list-group-item subcategory-name">
+                                        @ci.Name <small class="subcategory-desc">@ci.Description</small>
+                                        <span class="float-right">
+                                            <span class="float-right pl-3">
+                                                <text class="text-sm">@($"{ci.GetThisMonthBudgetUsage():P2}") spent</text>
+                                            </span>
+                                            @if( Request.RawUrl != "/" ) {
+                                                <text>@Html.Partial("partials/buttons/_CategoryItemEditButton", ci)</text>
+                                                <text>@Html.Partial("partials/buttons/_CategoryItemDeleteButton", ci)</text>
+                                            }
+                                        </span>
+                                    </li>
                                 }
                             </ul>
                         }

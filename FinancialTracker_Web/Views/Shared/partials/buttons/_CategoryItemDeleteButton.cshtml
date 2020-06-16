@@ -1,0 +1,33 @@
+﻿@using FinancialTracker_Web.Models
+@using Microsoft.AspNet.Identity
+
+@model CategoryItem
+<button type="button" id="delCategory@(Model.Id)_btn" class="btn btn-sm btn-outline-danger btn-popover"><i class="fas fa-times"></i></button>
+<div id="delCategory@(Model.Id)_form" style="display:none">
+    @using( Html.BeginForm("Delete", "Categories", FormMethod.Post) ) {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("Id", Model.Id)
+        
+        <div class="row row-cols-1">
+            <div class="col pb-2 mb-2 border-bottom">
+                <p>All subcategories within this category will be permanently deleted!</p>
+                <p>Transactions related to these categories will remain, but will be un-categorized.</p>
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-block btn-danger">Delete Category</button>
+            </div>
+        </div>
+    }
+</div>
+
+
+<script>
+    $('#delCategory@(Model.Id)_btn').popover({
+        placement: 'bottom',
+        title: 'Delete @Model.Name?',
+        html: true,
+        sanitize: false,
+        content: $('#delCategory@(Model.Id)_form').html()
+    });
+
+</script>

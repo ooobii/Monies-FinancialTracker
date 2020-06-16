@@ -3,6 +3,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
+using Antlr.Runtime;
 
 namespace FinancialTracker_Web.Controllers
 {
@@ -10,94 +11,41 @@ namespace FinancialTracker_Web.Controllers
     {
         private AppDbContext db = new AppDbContext();
 
-        // GET: CategoryItems
-        public ActionResult Index() {
-            var categoryItems = db.CategoryItems.Include(c => c.ParentCategory);
-            return View(categoryItems.ToList());
-        }
-
-        // GET: CategoryItems/Details/5
-        public ActionResult Details(int? id) {
-            if( id == null ) {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            CategoryItem categoryItem = db.CategoryItems.Find(id);
-            if( categoryItem == null ) {
-                return HttpNotFound();
-            }
-            return View(categoryItem);
-        }
-
-        // GET: CategoryItems/Create
-        public ActionResult Create() {
-            ViewBag.ParentCategoryId = new SelectList(db.Categories, "Id", "AccountName");
-            return View();
-        }
-
-        // POST: CategoryItems/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,ParentCategoryId,AccountName,Description")] CategoryItem categoryItem) {
+        public ActionResult Create([Bind(Include = "ParentCategoryId,Name,Description,AmountBudgeted")] CategoryItem categoryItem, string returnUrl) {
             if( ModelState.IsValid ) {
                 db.CategoryItems.Add(categoryItem);
                 db.SaveChanges();
-                return RedirectToAction("Index");
             }
-
-            ViewBag.ParentCategoryId = new SelectList(db.Categories, "Id", "AccountName", categoryItem.ParentCategoryId);
-            return View(categoryItem);
+            return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
 
-        // GET: CategoryItems/Edit/5
-        public ActionResult Edit(int? id) {
-            if( id == null ) {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            CategoryItem categoryItem = db.CategoryItems.Find(id);
-            if( categoryItem == null ) {
-                return HttpNotFound();
-            }
-            ViewBag.ParentCategoryId = new SelectList(db.Categories, "Id", "AccountName", categoryItem.ParentCategoryId);
-            return View(categoryItem);
-        }
-
-        // POST: CategoryItems/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,ParentCategoryId,AccountName,Description")] CategoryItem categoryItem) {
+        public ActionResult Edit(EditCategoryItemModel model, string returnUrl) {
             if( ModelState.IsValid ) {
-                db.Entry(categoryItem).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            ViewBag.ParentCategoryId = new SelectList(db.Categories, "Id", "AccountName", categoryItem.ParentCategoryId);
-            return View(categoryItem);
-        }
+                var catItem = db.CategoryItems.Find(model.Id);
+                if( catItem != null ) {
+                    catItem.Name = model.Name;
+                    catItem.Description = model.Description;
+                    catItem.AmountBudgeted = model.AmountBudgeted;
 
-        // GET: CategoryItems/Delete/5
-        public ActionResult Delete(int? id) {
-            if( id == null ) {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                    db.SaveChanges();
+                }
             }
-            CategoryItem categoryItem = db.CategoryItems.Find(id);
-            if( categoryItem == null ) {
-                return HttpNotFound();
-            }
-            return View(categoryItem);
+            return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
 
         // POST: CategoryItems/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id) {
+        public ActionResult Delete(int id, string returnUrl) {
             CategoryItem categoryItem = db.CategoryItems.Find(id);
+            
             db.CategoryItems.Remove(categoryItem);
             db.SaveChanges();
-            return RedirectToAction("Index");
+            return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
 
         protected override void Dispose(bool disposing) {
@@ -106,5 +54,17 @@ namespace FinancialTracker_Web.Controllers
             }
             base.Dispose(disposing);
         }
+
+
+
+
+        #region Helpers 
+        private ActionResult RedirectToLocal(string returnUrl, ActionResult fallback = null) {
+            if( Url.IsLocalUrl(returnUrl) ) {
+                return Redirect(returnUrl);
+            }
+            return fallback ?? RedirectToAction("Index", "Home");
+        }
+        #endregion
     }
 }

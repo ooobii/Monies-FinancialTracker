@@ -1,0 +1,53 @@
+﻿@using FinancialTracker_Web.Models
+@using Microsoft.AspNet.Identity
+
+@model Category
+
+<button type="button" id="createCategory_btn" class="btn btn-sm btn-outline-success btn-popover"><i class="far fa-plus-square"></i></button>
+<div id="createCategory_form" style="display:none">
+    @using( Html.BeginForm("Create", "CategoryItems", FormMethod.Post) ) {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("returnUrl", Request.RawUrl)
+        @Html.Hidden("ParentCategoryId", Model.Id)
+        
+    <div class="row row-cols-1">
+        <div class="col">
+            <label for="name">Category Name:</label>
+        </div>
+        <div class="col pb-2 mb-2 border-bottom">
+            <input type="text" id="name" name="Name" placeholder="Type a name..." class="full-width" />
+        </div>
+        <div class="col">
+            <label for="desc">Description:</label>
+        </div>
+        <div class="col pb-2 mb-2 border-bottom">
+            <textarea type="text" id="desc" name="Description" placeholder="Type a description..." class="full-width" rows="3"></textarea>
+        </div>
+        <div class="col">
+            <label for="budget">Monthly Allocated Spending:</label>
+        </div>
+        <div class="col pb-2 mb-2 border-bottom">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">$</span>
+                </div>
+                <input type="number" step=".01" class="form-control text-right pr-2" id="budget" name="AmountBudgeted">
+            </div>
+        </div>
+        <div class="col">
+            <button type="submit" class="btn btn-block btn-success">Create Subcategory</button>
+        </div>
+    </div>
+    }
+</div>
+
+
+<script>
+    $('#createCategory_btn').popover({
+        placement: 'left',
+        title: 'Create New Category:',
+        html: true,
+        sanitize: false,
+        content: $('#createCategory_form').html()
+    });
+</script>

@@ -5,8 +5,8 @@
 @{
     var accTypes = new AppDbContext().BankAccountTypes.ToDictionary(t => t.Id, t => t.Name);
 }
-<button type="button" id="editAccount_btn" class="btn btn-sm btn-outline-warning btn-popover"><i class="fas fa-pencil-alt"></i></button>
-<div id="editAccount_form" style="display:none">
+<button type="button" id="editAccount@(Model.Id)_btn" class="btn btn-sm btn-outline-warning btn-popover"><i class="fas fa-pencil-alt"></i></button>
+<div id="editAccount@(Model.Id)_form" style="display:none">
     @using( Html.BeginForm("Edit", "BankAccounts", FormMethod.Post) ) {
         @Html.AntiForgeryToken()
         @Html.Hidden("Id", Model.Id)
@@ -37,7 +37,7 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text">$</span>
                     </div>
-                    <input type="number" class="form-control text-right" id="lowbal" name="LowBalanceAlertThreshold" value="@Model.LowBalanceAlertThreshold">
+                    <input type="number" step=".01" class="form-control text-right" id="lowbal" name="LowBalanceAlertThreshold" value="@Model.LowBalanceAlertThreshold">
                 </div>
             </div>
             <div class="col">
@@ -49,11 +49,11 @@
 
 
 <script>
-    $('#editAccount_btn').popover({
+    $('#editAccount@(Model.Id)_btn').popover({
         placement: 'bottom',
         title: 'Edit Account: @Model.AccountName',
         html: true,
         sanitize: false,
-        content: $('#editAccount_form').html()
+        content: $('#editAccount@(Model.Id)_form').html()
     });
 </script>

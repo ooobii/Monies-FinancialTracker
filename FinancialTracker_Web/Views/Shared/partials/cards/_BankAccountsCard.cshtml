@@ -23,10 +23,13 @@
                                     <a class="pr-3" href="@Url.Action("Details", "BankAccounts", new { id = acc.Id })">
                                         @acc.AccountName
                                     </a>
-                                    
-                                    @if( acc.OwnerId == User.Identity.GetUserId() ) {
-                                        @Html.Partial("partials/buttons/_BankAccountEditButton", acc)
-                                        @Html.Partial("partials/buttons/_BankAccountDeleteButton", acc)
+
+                                    @if( acc.OwnerId == User.Identity.GetUserId() && Request.RawUrl != "/" ) {
+                                        <div class="float-right">
+                                            @Html.Partial("partials/buttons/_BankAccountEditButton", acc)
+                                            @Html.Partial("partials/buttons/_BankAccountDeleteButton", acc)
+                                        </div>
+
                                     }
                                 </td>
                                 <td>@acc.AccountType.Name</td>

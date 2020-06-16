@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
+using System.Linq;
 
 namespace FinancialTracker_Web.Models
 {
@@ -15,22 +18,31 @@ namespace FinancialTracker_Web.Models
         public string Memo { get; set; }
 
         [Required]
+        [Range(0.0, int.MaxValue)]
         public decimal Amount { get; set; }
 
         [Required]
-        public DateTime RecordedAt { get; set; }
+        public DateTime OccuredAt { get; set; }
 
         [Required]
         public DateTime CreatedAt { get; set; }
+
 
 
         public decimal GetAmount() {
             if( this.TransactionType.IsIncome ) { return Amount; } else { return Amount * -1; }
         }
 
+        public decimal GetPercentOfBudget() {
+            if( CategoryItem.AmountBudgeted != null ) return Amount / CategoryItem.AmountBudgeted.Value;
+            return 0;
+        }
+
         public virtual BankAccount ParentAccount { get; set; }
         public virtual TransactionType TransactionType { get; set; }
         public virtual CategoryItem CategoryItem { get; set; }
         public virtual ApplicationUser Owner { get; set; }
+
+
     }
 }

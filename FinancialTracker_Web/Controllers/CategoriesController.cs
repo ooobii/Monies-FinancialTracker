@@ -11,33 +11,21 @@ namespace FinancialTracker_Web.Controllers
     {
         private AppDbContext db = new AppDbContext();
 
-        // GET: Categories
         public ActionResult Index() {
             var categories = db.Categories.Include(c => c.ParentHousehold);
             return View(categories.ToList());
         }
-
-        // GET: Categories/Details/5
         public ActionResult Details(int? id) {
             if( id == null ) {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             Category category = db.Categories.Find(id);
-            if( category == null ) {
+            if( category == null || category.ParentHouseholdId != ApplicationUser.GetParentHouseholdId(User, db) ) {
                 return HttpNotFound();
             }
             return View(category);
         }
 
-        // GET: Categories/Create
-        public ActionResult Create() {
-            ViewBag.ParentHouseholdId = new SelectList(db.Households, "Id", "AccountName");
-            return View();
-        }
-
-        // POST: Categories/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "ParentHouseholdId,Name,Description")] Category category, string returnUrl) {
@@ -50,50 +38,25 @@ namespace FinancialTracker_Web.Controllers
             return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
 
-        // GET: Categories/Edit/5
-        public ActionResult Edit(int? id) {
-            if( id == null ) {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Category category = db.Categories.Find(id);
-            if( category == null ) {
-                return HttpNotFound();
-            }
-            ViewBag.ParentHouseholdId = new SelectList(db.Households, "Id", "AccountName", category.ParentHouseholdId);
-            return View(category);
-        }
-
-        // POST: Categories/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,ParentHouseholdId,AccountName,Description,AmountBudgeted")] Category category) {
+        public ActionResult Edit(EditCategoryModel model, string returnUrl) {
             if( ModelState.IsValid ) {
-                db.Entry(category).State = EntityState.Modified;
+                var cat = db.Categories.Find(model.Id);
+                cat.Name = model.Name;
+                cat.Description = model.Description;
+                
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
             }
-            ViewBag.ParentHouseholdId = new SelectList(db.Households, "Id", "AccountName", category.ParentHouseholdId);
-            return View(category);
+
+            return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
 
-        // GET: Categories/Delete/5
-        public ActionResult Delete(int? id) {
-            if( id == null ) {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Category category = db.Categories.Find(id);
-            if( category == null ) {
-                return HttpNotFound();
-            }
-            return View(category);
-        }
 
-        // POST: Categories/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id) {
+        public ActionResult Delete(int id) {
             Category category = db.Categories.Find(id);
             db.Categories.Remove(category);
             db.SaveChanges();

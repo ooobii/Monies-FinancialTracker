@@ -1,0 +1,44 @@
+﻿@using FinancialTracker_Web.Models
+@using Microsoft.AspNet.Identity
+
+@model Category
+
+<button type="button" id="editCategory@(Model.Id)_btn" class="btn btn-sm btn-outline-warning btn-popover"><i class="fas fa-pencil-alt"></i></button>
+<div id="editCategory@(Model.Id)_form" style="display:none">
+    @using( Html.BeginForm("Edit", "Categories", FormMethod.Post) ) {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("Id", Model.Id)
+        @Html.Hidden("returnUrl", Request.RawUrl)
+
+        <div class="row row-cols-1">
+            <div class="col">
+                <label for="name">Category Name:</label>
+            </div>
+            <div class="col pb-2 mb-2 border-bottom">
+                <input type="text" id="name" name="Name" placeholder="Type a name..." class="full-width" value="@Model.Name" />
+            </div>
+            <div class="col">
+                <label for="desc">Description:</label>
+            </div>
+            <div class="col pb-2 mb-2 border-bottom">
+                <textarea type="text" id="desc" name="Description" placeholder="Type a description..." class="full-width" rows="3">
+@Model.Description
+                </textarea>
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-block btn-warning">Submit Changes</button>
+            </div>
+        </div>
+    }
+</div>
+
+
+<script>
+    $('#editCategory@(Model.Id)_btn').popover({
+        placement: 'bottom',
+        title: 'Edit Category: @Model.Name',
+        html: true,
+        sanitize: false,
+        content: $('#editCategory@(Model.Id)_form').html()
+    });
+</script>

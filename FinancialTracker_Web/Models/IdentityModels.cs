@@ -58,15 +58,15 @@ namespace FinancialTracker_Web.Models
             return context.Users.Find(id).Household;
         }
 
-        public static int GetParentHouseholdId(IPrincipal user, AppDbContext context = null) {
+        public static int? GetParentHouseholdId(IPrincipal user, AppDbContext context = null) {
             if( context == null ) { context = new AppDbContext(); }
 
-            return context.Users.Find(user.Identity.GetUserId()).Household.Id;
+            return context.Users.Find(user.Identity.GetUserId()).HouseholdId;
         }
-        public static int GetParentHouseholdId(string id, AppDbContext context = null) {
+        public static int? GetParentHouseholdId(string id, AppDbContext context = null) {
             if( context == null ) { context = new AppDbContext(); }
 
-            return context.Users.Find(id).Household.Id;
+            return context.Users.Find(id).HouseholdId;
         }
 
 

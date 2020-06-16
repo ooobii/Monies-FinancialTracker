@@ -14,6 +14,18 @@
     text-align: center;
 }
 
+.category-name {
+    font-size: 1.5rem;
+}
+.subcategory-name {
+    font-size: 1.2rem;
+}
+.category-desc, .subcategory-desc {
+    padding-left:3rem;
+    font-size: .8rem;
+    color: #777
+}
+
 
 .full-width {
     width:100%;
