@@ -33,7 +33,6 @@ namespace FinancialTracker_Web.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "OwnerId,ParentHouseholdId,AccountTypeId,AccountName,StartingBalance,LowBalanceAlertThreshold")] BankAccount bankAccount, string returnUrl) {
             bankAccount.CreatedAt = DateTime.Now;
-            bankAccount.CurrentBalance = bankAccount.StartingBalance;
             if( ModelState.IsValid ) {
 
                 db.BankAccounts.Add(bankAccount);
@@ -66,7 +65,7 @@ namespace FinancialTracker_Web.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, string returnUrl) {
             BankAccount bankAccount = db.BankAccounts.Find(id);
-            if(bankAccount.OwnerId == User.Identity.GetUserId()) {
+            if( bankAccount.OwnerId == User.Identity.GetUserId() ) {
                 db.BankAccounts.Remove(bankAccount);
                 db.SaveChanges();
                 return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));

@@ -1,4 +1,5 @@
-﻿using FinancialTracker_Web.Models;
+﻿using System;
+using FinancialTracker_Web.Models;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
@@ -39,15 +40,14 @@ namespace FinancialTracker_Web.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,ParentHouseholdId,AccountName,Description,AmountBudgeted")] Category category) {
+        public ActionResult Create([Bind(Include = "ParentHouseholdId,Name,Description")] Category category, string returnUrl) {
             if( ModelState.IsValid ) {
+                category.CreatedAt = DateTime.Now;
                 db.Categories.Add(category);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
             }
-
-            ViewBag.ParentHouseholdId = new SelectList(db.Households, "Id", "AccountName", category.ParentHouseholdId);
-            return View(category);
+            return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
 
         // GET: Categories/Edit/5
@@ -106,5 +106,17 @@ namespace FinancialTracker_Web.Controllers
             }
             base.Dispose(disposing);
         }
+
+
+
+
+        #region Helpers 
+        private ActionResult RedirectToLocal(string returnUrl, ActionResult fallback = null) {
+            if( Url.IsLocalUrl(returnUrl) ) {
+                return Redirect(returnUrl);
+            }
+            return fallback ?? RedirectToAction("Index", "Home");
+        }
+        #endregion
     }
 }

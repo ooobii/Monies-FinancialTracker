@@ -14,7 +14,7 @@
         <div class="card">
             <div class="card-header bg-gradient-green">Current Balance</div>
             <div class="card-body">
-                <p class="balance-lg">@Model.CurrentBalance.ToString("$0.00")</p>
+                <p class="balance-lg">@Model.GetCurrentBalance().ToString("$0.00")</p>
             </div>
         </div>
     </div>

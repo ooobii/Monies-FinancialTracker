@@ -5,7 +5,7 @@
 @{
     var accTypes = new AppDbContext().BankAccountTypes.ToDictionary(t => t.Id, t => t.Name);
 }
-<button type="button" id="editAccount_btn" class="btn btn-sm btn-outline-primary btn-popover"><i class="fas fa-pencil-alt"></i></button>
+<button type="button" id="editAccount_btn" class="btn btn-sm btn-outline-warning btn-popover"><i class="fas fa-pencil-alt"></i></button>
 <div id="editAccount_form" style="display:none">
     @using( Html.BeginForm("Edit", "BankAccounts", FormMethod.Post) ) {
         @Html.AntiForgeryToken()
@@ -51,7 +51,7 @@
 <script>
     $('#editAccount_btn').popover({
         placement: 'bottom',
-        title: 'Edit Account "@Model.AccountName":',
+        title: 'Edit Account: @Model.AccountName',
         html: true,
         sanitize: false,
         content: $('#editAccount_form').html()

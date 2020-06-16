@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace FinancialTracker_Web.Models
 {
@@ -15,6 +16,9 @@ namespace FinancialTracker_Web.Models
 
         [MaxLength(500)]
         public string Description { get; set; }
+
+
+        public decimal? AmountBudgeted { get; set; }
 
         public virtual Category ParentCategory { get; set; }
     }

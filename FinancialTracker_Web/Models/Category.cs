@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace FinancialTracker_Web.Models
@@ -17,7 +18,8 @@ namespace FinancialTracker_Web.Models
         [MaxLength(500)]
         public string Description { get; set; }
 
-        public decimal? AmountBudgeted { get; set; }
+        public DateTime CreatedAt { get; set; }
+
 
         public virtual Household ParentHousehold { get; set; }
         public virtual ICollection<CategoryItem> Items { get; set; }

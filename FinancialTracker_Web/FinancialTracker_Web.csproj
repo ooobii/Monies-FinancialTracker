@@ -446,11 +446,7 @@
     <Content Include="Views\CategoryItems\Details.cshtml" />
     <Content Include="Views\CategoryItems\Edit.cshtml" />
     <Content Include="Views\CategoryItems\Index.cshtml" />
-    <Content Include="Views\Households\Create.cshtml" />
-    <Content Include="Views\Households\Delete.cshtml" />
     <Content Include="Views\Households\Details.cshtml" />
-    <Content Include="Views\Households\Edit.cshtml" />
-    <Content Include="Views\Households\Index.cshtml" />
     <Content Include="Views\TransactionTypes\Create.cshtml" />
     <Content Include="Views\TransactionTypes\Delete.cshtml" />
     <Content Include="Views\TransactionTypes\Details.cshtml" />
@@ -481,6 +477,7 @@
     <Content Include="Views\BankAccounts\Details.cshtml" />
     <Content Include="Views\Shared\partials\buttons\_BankAccountEditButton.cshtml" />
     <Content Include="Views\Shared\partials\buttons\_BankAccountDeleteButton.cshtml" />
+    <Content Include="Views\Shared\partials\buttons\_CategoryCreateButton.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

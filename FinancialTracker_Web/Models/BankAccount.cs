@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace FinancialTracker_Web.Models
 {
@@ -22,8 +23,13 @@ namespace FinancialTracker_Web.Models
         [Required]
         public decimal StartingBalance { get; set; }
 
-        [Required]
-        public decimal CurrentBalance { get; set; }
+        public decimal GetCurrentBalance() {
+            if(this.Transactions.Count > 0) {
+                return this.StartingBalance + this.Transactions.Sum(t => t.GetAmount());
+            } else {
+                return this.StartingBalance;
+            }
+        }
 
 
         public decimal? LowBalanceAlertThreshold { get; set; }
