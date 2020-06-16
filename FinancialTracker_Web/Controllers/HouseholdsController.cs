@@ -11,7 +11,8 @@ namespace FinancialTracker_Web.Controllers
     public class HouseholdsController : Controller
     {
         private AppDbContext db = new AppDbContext();
-        // GET: Households/Details/5
+        
+
         public ActionResult Details() {
             var house = ApplicationUser.GetFromDb(User, db).Household;
             if( house == null ) {
@@ -37,10 +38,14 @@ namespace FinancialTracker_Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Name,Greeting")] Household household, string returnUrl) {
+        public ActionResult Edit(EditHouseholdModel model, string returnUrl) {
             if( ModelState.IsValid ) {
-                db.Entry(household).State = EntityState.Modified;
-                db.SaveChanges();
+                var house = db.Households.Find(model.Id);
+                if( house != null && User.Identity.GetUserId() == house.CreatorId ) {
+                    house.Name = model.Name;
+                    house.Greeting = model.Greeting;
+                    db.SaveChanges();
+                }
             }
             return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
@@ -51,11 +56,17 @@ namespace FinancialTracker_Web.Controllers
             Household household = db.Households.Find(id);
             if( household != null ) {
                 household.Members.Clear();
+                household.Categories.Clear();
                 db.Households.Remove(household);
                 db.SaveChanges();
             }
             return RedirectToAction("Index", "Home");
         }
+
+
+
+
+
 
         protected override void Dispose(bool disposing) {
             if( disposing ) {

@@ -10,11 +10,8 @@ namespace FinancialTracker_Web.Controllers
     public class CategoriesController : Controller
     {
         private AppDbContext db = new AppDbContext();
+        
 
-        public ActionResult Index() {
-            var categories = db.Categories.Include(c => c.ParentHousehold);
-            return View(categories.ToList());
-        }
         public ActionResult Details(int? id) {
             if( id == null ) {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -53,15 +50,19 @@ namespace FinancialTracker_Web.Controllers
             return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id) {
+        public ActionResult Delete(int id, string returnUrl) {
             Category category = db.Categories.Find(id);
             db.Categories.Remove(category);
             db.SaveChanges();
-            return RedirectToAction("Index");
+            return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
+
+
+
+
+
 
         protected override void Dispose(bool disposing) {
             if( disposing ) {

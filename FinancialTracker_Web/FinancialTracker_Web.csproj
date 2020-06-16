@@ -197,6 +197,7 @@
     <Compile Include="Models\CategoryItem.cs" />
     <Compile Include="Models\CategoryViewModels.cs" />
     <Compile Include="Models\Household.cs" />
+    <Compile Include="Models\HouseholdViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\Invitation.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
@@ -409,8 +410,6 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Home\About.cshtml" />
-    <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Account\_ExternalLoginsListPartial.cshtml" />
     <Content Include="Views\Account\ConfirmEmail.cshtml" />
@@ -437,10 +436,7 @@
     <Content Include="Views\BankAccountTypes\Details.cshtml" />
     <Content Include="Views\BankAccountTypes\Edit.cshtml" />
     <Content Include="Views\BankAccountTypes\Index.cshtml" />
-    <Content Include="Views\Categories\Delete.cshtml" />
     <Content Include="Views\Categories\Details.cshtml" />
-    <Content Include="Views\Categories\Edit.cshtml" />
-    <Content Include="Views\Categories\Index.cshtml" />
     <Content Include="Views\CategoryItems\Details.cshtml" />
     <Content Include="Views\Households\Details.cshtml" />
     <Content Include="Views\TransactionTypes\Create.cshtml" />
@@ -479,6 +475,7 @@
     <Content Include="Views\Shared\partials\buttons\_CategoryItemCreateButton.cshtml" />
     <Content Include="Views\Shared\partials\buttons\_CategoryItemEditButton.cshtml" />
     <Content Include="Views\Shared\partials\buttons\_CategoryItemDeleteButton.cshtml" />
+    <Content Include="Views\Shared\partials\buttons\_HouseholdEditButton.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

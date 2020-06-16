@@ -1,0 +1,39 @@
+﻿@using Microsoft.AspNet.Identity
+@model FinancialTracker_Web.Models.Household
+
+<button type="button" id="createHouse_btn" class="btn btn-lg btn-block btn-outline-primary">Create a New Household</button>
+<div id="createHouse_form" style="display:none">
+    @using( Html.BeginForm("Edit", "Households", FormMethod.Post) ) {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("Id", Model.Id)
+
+    <div class="row row-cols-1">
+        <div class="col">
+            <label for="Name">Household Name:</label>
+        </div>
+        <div class="col pb-2 mb-2 border-bottom">
+            <input type="text" id="Name" name="Name" placeholder="Type a name..." class="full-width" value="@Model.Name"/>
+        </div>
+        <div class="col">
+            <label for="Greeting">Greeting:</label>
+        </div>
+        <div class="col pb-2 mb-2 border-bottom">
+            <textarea type="text" id="Greeting" name="Greeting" placeholder="Type a greeting..." class="full-width" rows="3">@Model.Greeting</textarea>
+        </div>
+        <div class="col">
+            <button type="submit" class="btn btn-block btn-warning">Submit Changes</button>
+        </div>
+    </div>
+    }
+</div>
+
+
+<script>
+    $('#createHouse_btn').popover({
+        placement: 'left',
+        title: 'Edit Household: @Model.Name',
+        html: true,
+        sanitize: false,
+        content: $('#createHouse_form').html()
+    })
+</script>

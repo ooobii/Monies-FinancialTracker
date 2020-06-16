@@ -11,6 +11,9 @@ namespace FinancialTracker_Web.Controllers
     {
         private AppDbContext db = new AppDbContext();
 
+
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "ParentCategoryId,Name,Description,AmountBudgeted")] CategoryItem categoryItem, string returnUrl) {
@@ -37,7 +40,6 @@ namespace FinancialTracker_Web.Controllers
             return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
 
-        // POST: CategoryItems/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, string returnUrl) {
@@ -47,6 +49,11 @@ namespace FinancialTracker_Web.Controllers
             db.SaveChanges();
             return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
+
+
+
+
+
 
         protected override void Dispose(bool disposing) {
             if( disposing ) {
