@@ -1,4 +1,8 @@
-﻿.small-label {
+﻿
+.full-width {
+    width: 100%;
+}
+.small-label {
     margin-bottom: 0;
     font-size: .9rem;
     text-decoration: underline;
@@ -14,19 +18,33 @@
     text-align: center;
 }
 
-.category-name {
-    font-size: 1.5rem;
+.category-list-group-item, .subcategory-list-group-item {
+    padding:.5rem;
 }
+.subcategory-list-group-item {
+    margin-left: 2rem;
+}
+    .category-name {
+        font-size: 1.5rem;
+    }
 .subcategory-name {
     font-size: 1.2rem;
 }
 .category-desc, .subcategory-desc {
-    padding-left:3rem;
+    padding-left:1rem;
     font-size: .8rem;
-    color: #777
+    color: #aaaaaa
+}
+
+.bigdrop {
+    width: 450px !important;
+}
+.select2-dropdown {
+    z-index: 9001;
 }
 
 
-.full-width {
-    width:100%;
+
+.text-med {
+    font-size: 15px !important;
 }

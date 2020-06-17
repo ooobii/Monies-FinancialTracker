@@ -14,7 +14,11 @@ namespace FinancialTracker_Web.Models
         public int? CategoryItemId { get; set; }
         public string OwnerId { get; set; }
 
+        [Required]
         [MaxLength(45)]
+        public string Name { get; set; }
+
+        [MaxLength(120)]
         public string Memo { get; set; }
 
         [Required]

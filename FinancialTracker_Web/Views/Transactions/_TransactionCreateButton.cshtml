@@ -1,0 +1,120 @@
+﻿@using FinancialTracker_Web.Models
+
+@model BankAccount
+
+@using FinancialTracker_Web.Models
+@using Microsoft.AspNet.Identity
+@{
+    var transTypes = new AppDbContext().TransactionTypes.ToList();
+    var cats = new AppDbContext().Categories.Where(c => c.ParentHouseholdId == Model.ParentHouseholdId).ToList();
+}
+<button type="button" id="createTransaction_btn" class="btn btn-sm btn-success btn-popover"><i class="fas fa-plus-square"></i></button>
+<div id="createTransaction_form" style="display:none">
+    @using( Html.BeginForm("Create", "Transactions", FormMethod.Post) ) {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("returnUrl", Request.RawUrl)
+        @Html.Hidden("ParentAccountId", Model.Id)
+
+        <div class="row row-cols-1">
+            <div class="col">
+                <label for="name">Name:</label>
+            </div>
+            <div class="col pb-2 mb-2 border-bottom">
+                <input type="text" id="name" name="Name" placeholder="Name..." class="full-width" />
+            </div>
+
+            <div class="col">
+                <label for="memo">Memo:</label>
+            </div>
+            <div class="col pb-2 mb-2 border-bottom">
+                <input type="text" id="memo" name="Memo" placeholder="Type a note..." class="full-width" />
+            </div>
+
+            <div class="col">
+                <label for="amnt">Amount:</label>
+            </div>
+            <div class="col pb-2 mb-2 border-bottom">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">$</span>
+                    </div>
+                    <input type="number" step=".01" class="form-control text-right pr-2" id="amnt" name="Amount">
+                </div>
+            </div>
+
+            <div class="col">
+                <label for="date">Occurence Date:</label>
+            </div>
+            <div class="col pb-2 mb-2 border-bottom">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                        </div>
+                        <input type="text" class="form-control" name="OccuredAt" data-inputmask-alias="datetime" data-inputmask-inputformat="mm/dd/yyyy hh:MM TT" data-mask>
+                    </div>
+                </div>
+                <script>
+                    $('[data-mask]').inputmask('mm/dd/yyyy hh:MM TT', { 'placeholder': 'mm/dd/yyyy hh:MM TT' })
+                </script>
+            </div>
+
+            <div class="col">
+                <label>Type:</label>
+            </div>
+            <div class="col pb-2 mb-2 border-bottom">
+                <select class="select2-desc text-sm full-width" name="TransactionTypeId">
+                    @foreach( var tt in transTypes.OrderByDescending(tt => tt.IsIncome).ThenBy(tt => tt.Name) ) {
+                        if( tt.IsIncome ) {
+                            <option value="@tt.Id" title="@tt.Description">@tt.Name <span class="text-success text-sm">(income)</span></option>
+                        } else {
+                            <option value="@tt.Id" title="@tt.Description">@tt.Name <span class="text-danger text-sm">(expense)</span></option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col">
+                <label>Category:</label>
+            </div>
+            <div class="col pb-2 mb-2 border-bottom">
+                <select class="select2-desc text-sm full-width" name="CategoryItemId">
+                    <option value="" title="Expense/Income that does not fall under any category.">No Category</option>
+                    @foreach( var c in cats.OrderBy(c => c.Name) ) {
+                        <option title="@c.Description" disabled>@c.Name</option>
+                        foreach( var ci in c.CategoryItems ) {
+                            <option value="@ci.Id" title="@ci.Description">@ci.Name</option>
+                        }
+                    }
+                </select>
+                <script>
+                    function formatOption (option) {
+                        var $option = $(
+                            '<div><strong>' + option.text + '</strong></div><div>' + option.title + '</div>'
+                        );
+                        return $option;
+                    };
+                    $(".select2-desc").select2({
+                        templateResult: formatOption,
+                        dropdownCssClass: 'bigdrop'
+                    });
+                </script>
+            </div>
+
+            <div class="col">
+                <button type="submit" class="btn btn-block btn-success">Add Transaction</button>
+            </div>
+        </div>
+    }
+</div>
+
+
+<script>
+    $('#createTransaction_btn').popover({
+        placement: 'left',
+        title: 'Add New Transaction:',
+        html: true,
+        sanitize: false,
+        content: $('#createTransaction_form').html()
+    });
+</script>

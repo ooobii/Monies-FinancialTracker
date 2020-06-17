@@ -8,12 +8,12 @@
         <div class="card-body">
 
             @if( Model.BankAccounts.Count > 0 ) {
-                <table id="data-table">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>Account Name</th>
-                            <th>Type</th>
-                            <th>Balance</th>
+                            <th class="text-center">Type</th>
+                            <th class="text-right">Balance</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -26,14 +26,14 @@
 
                                     @if( acc.OwnerId == User.Identity.GetUserId() && Request.RawUrl != "/" ) {
                                         <div class="float-right">
-                                            @Html.Partial("partials/buttons/_BankAccountEditButton", acc)
-                                            @Html.Partial("partials/buttons/_BankAccountDeleteButton", acc)
+                                            @Html.Partial("~/Views/BankAccounts/_BankAccountEditButton.cshtml", acc)
+                                            @Html.Partial("~/Views/BankAccounts/_BankAccountDeleteButton.cshtml", acc)
                                         </div>
 
                                     }
                                 </td>
-                                <td>@acc.AccountType.Name</td>
-                                <td>@acc.GetCurrentBalance()</td>
+                                <td class="text-center">@acc.AccountType.Name</td>
+                                <td class="text-right">@acc.GetCurrentBalance()</td>
                             </tr>
                         }
                     </tbody>
@@ -46,7 +46,7 @@
             <div class="card-footer">
                 <div class="float-right">
                     @*<a href="@Url.Action("Create", "BankAccounts")" class="btn btn-sm btn-outline-primary card-link">Create New Account</a>*@
-                    @Html.Partial("partials/buttons/_BankAccountCreateButton", Model)
+                    @Html.Partial("~/Views/BankAccounts/_BankAccountCreateButton.cshtml", Model)
                 </div>
             </div>
         }

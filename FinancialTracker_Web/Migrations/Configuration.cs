@@ -14,7 +14,6 @@ namespace FinancialTracker_Web.Migrations
         }
 
         protected override void Seed(FinancialTracker_Web.Models.AppDbContext context) {
-            //stores
             RoleManager<IdentityRole> roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(context));
             var userStore = new UserStore<ApplicationUser>(context);
             var userManager = new UserManager<ApplicationUser>(userStore);

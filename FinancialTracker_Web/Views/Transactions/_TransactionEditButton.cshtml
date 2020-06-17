@@ -1,0 +1,120 @@
+﻿@using FinancialTracker_Web.Models
+
+@model Transaction
+
+@using FinancialTracker_Web.Models
+@using Microsoft.AspNet.Identity
+@{
+    var transTypes = new AppDbContext().TransactionTypes.ToList();
+    var cats = new AppDbContext().Categories.Where(c => c.ParentHouseholdId == Model.ParentAccount.ParentHouseholdId).ToList();
+}
+<button type="button" id="editTransaction@(Model.Id)_btn" class="btn btn-sm btn-outline-warning btn-popover"><i class="fas fa-pencil-alt"></i></button>
+<div class="popover-form" id="editTransaction@(Model.Id)_form" style="display:none">
+    @using( Html.BeginForm("Edit", "Transactions", FormMethod.Post) ) {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("returnUrl", Request.RawUrl)
+        @Html.Hidden("Id", Model.Id)
+
+    <div class="row row-cols-1">
+        <div class="col">
+            <label for="name">Name:</label>
+        </div>
+        <div class="col pb-2 mb-1 border-bottom">
+            <input type="text" id="name" name="Name" placeholder="Name..." class="full-width" value="@Model.Name"/>
+        </div>
+
+        <div class="col">
+            <label for="memo">Memo:</label>
+        </div>
+        <div class="col pb-2 mb-1 border-bottom">
+            <textarea id="memo" name="Memo" placeholder="Type a note..." class="full-width" rows="3">@Model.Memo</textarea>
+        </div>
+
+        <div class="col">
+            <label for="amnt">Amount:</label>
+        </div>
+        <div class="col pb-2 mb-1 border-bottom">
+            <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">$</span>
+                </div>
+                <input type="number" step=".01" class="form-control text-right pr-2" id="amnt" name="Amount" value="@Model.Amount">
+            </div>
+        </div>
+
+        <div class="col">
+            <label for="date">Occurence Date:</label>
+        </div>
+        <div class="col pb-2 mb-1 border-bottom">
+            <div class="form-group-sm">
+                <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                    </div>
+                    <input type="text" class="form-control" name="OccuredAt" data-inputmask-alias="datetime" data-inputmask-inputformat="mm/dd/yyyy hh:MM TT" data-mask value="@Model.OccuredAt.ToString("MM/dd/yyyy hh:mm tt")">
+                </div>
+            </div>
+            <script>
+                $('[data-mask]').inputmask('mm/dd/yyyy hh:MM TT', { placeholder: 'mm/dd/yyyy hh:MM TT'})
+            </script>
+        </div>
+
+        <div class="col">
+            <label for="transType">Type:</label>
+        </div>
+        <div class="col pb-2 mb-1 border-bottom">
+            <select class="select2-desc text-sm full-width" id="transType" name="TransactionTypeId">
+                @foreach( var tt in transTypes.OrderByDescending(tt => tt.IsIncome).ThenBy(tt => tt.Name) ) {
+                    if( tt.IsIncome ) {
+                        <option value="@tt.Id" title="@tt.Description" @(tt.Id == Model.TransactionTypeId ? Html.Raw("selected") : Html.Raw(""))>Income: @tt.Name</option>
+                    } else {
+                        <option value="@tt.Id" title="@tt.Description" @(tt.Id == Model.TransactionTypeId ? Html.Raw("selected") : Html.Raw(""))>Expense: @tt.Name</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="col">
+            <label for="catItem">Category:</label>
+        </div>
+        <div class="col pb-3 mb-3 border-bottom">
+            <select class="select2-desc text-sm full-width" id="catItem" name="CategoryItemId">
+                <option value="" title="Expense/Income that does not fall under any category.">No Category</option>
+                @foreach( var c in cats.OrderBy(c => c.Name) ) {
+                    <option title="@c.Description" disabled>@c.Name</option>
+                    foreach( var ci in c.CategoryItems ) {
+                        <option value="@ci.Id" title="@ci.Description" @(ci.Id == Model.CategoryItemId ? Html.Raw("selected") : Html.Raw(""))>@ci.Name</option>
+                    }
+                }
+            </select>
+            <script>
+                function formatOption (option) {
+                    var $option = $(
+                        '<div><strong>' + option.text + '</strong></div><div>' + option.title + '</div>'
+                    );
+                    return $option;
+                };
+                $(".select2-desc").select2({
+                    templateResult: formatOption,
+                    dropdownCssClass: 'bigdrop'
+                });
+            </script>
+        </div>
+
+        <div class="col">
+            <button type="submit" class="btn btn-block btn-warning">Submit Changes</button>
+        </div>
+    </div>
+    }
+</div>
+
+
+<script>
+    $('#editTransaction@(Model.Id)_btn').popover({
+        placement: 'left',
+        title: 'Edit Transaction: @Model.Name',
+        html: true,
+        sanitize: false,
+        content: $('#editTransaction@(Model.Id)_form').html()
+    });
+</script>

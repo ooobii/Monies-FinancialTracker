@@ -1,47 +1,52 @@
 ﻿@using FinancialTracker_Web.Models
+@using Microsoft.AspNet.Identity
 @model BankAccount
 
 <div class="card">
-    <div class="card-header card-header-md bg-gradient-darkgreen"><i class="fas fa-coins mr-3"></i>Income</div>
+    <div class="card-header card-header-md bg-gradient-green"><i class="fas fa-coins mr-3"></i>Income</div>
     <div class="card-body">
 
-        @if( Model.Transactions.Count > 0 ) {
-            <table class="data-table">
-                <tr>
-                    <th>Memo</th>
-                    <th>Amount</th>
-                    <th>Spent By</th>
-                    <th>Actions</th>
-                </tr>
-                @foreach( Transaction t in Model.Transactions.Where(t => t.TransactionType.IsIncome == true) ) {
+        @if( Model.Transactions.Any(t => t.TransactionType.IsIncome) ) {
+            <table class="data-table-transactions text-med">
+                <thead>
                     <tr>
-                        <td>@t.Memo</td>
-                        <td>@t.Amount</td>
-                        <td>@t.Owner.GetShortName()</td>
-                        <td>
-                            <a class="btn btn-sm btn-outline-info"
-                               href="@Html.Action("Details", "Transactions", new { id = t.Id })">
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
-
-                            <a class="btn btn-sm btn-outline-warning"
-                               href="@Html.Action("Details", "Transactions", new { id = t.Id })">
-                                <i class="fas fa-pencil-alt"></i>
-                            </a>
-                        </td>
+                        <th rowspan="2" class="pt-5">Occured</th>
+                        <th rowspan="2" class="pt-5">Name</th>
+                        <th rowspan="2" class="pt-5">Amount</th>
+                        <th colspan="2" class="text-center">Added</th>
+                        <th rowspan="2" style="width:15px;"></th>
                     </tr>
-
-                }
-            </table>
-        } else {
-            <h5 class="text-center">No income yet! Feel free to <a href="@Url.Action("Create", "Transactions")">add some here</a></h5>
-        }
-    </div>
-    @if( Request.RawUrl != "/" ) {
-        <div class="card-footer">
-            <div class="float-right">
-                <a href="@Url.Action("Create", "Transactions", new {ParentHouseId = Model.Id})" class="btn btn-sm btn-outline-primary card-link">Create Transaction</a>
-            </div>
-        </div>
+                    <tr>
+                        <th class="text-center">At</th>
+                        <th class="text-center">By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach( Transaction t in Model.Transactions.Where(t => t.TransactionType.IsIncome == false)
+                        .OrderBy(t => t.OccuredAt) ) {
+                        <tr>
+                            <td>@t.OccuredAt.ToString("M/d/yy h:mm tt")</td>
+                            <td>@t.Name</td>
+                            <td>
+                                @if( t.GetAmount() > 0 ) {
+                                    <span class="text-sm text-bold text-success">- @t.Amount.ToString("$0.00")</span>
+                                } else {
+                                    <span class="text-sm text-bold text-danger">@t.Amount.ToString("$0.00")</span>
+                                }
+                            </td>
+                            <td>@t.CreatedAt.ToString("M/d/yy h:mm tt")</td>
+                            <td>@t.Owner.GetFullName()</td>
+                            <td style="width:15px;">
+                                @if( t.OwnerId == User.Identity.GetUserId() ) {
+                                    @Html.Partial("~/Views/Transactions/_TransactionEditButton.cshtml", t)
+                                }
+                            </td>
+                        </tr>
+                    }
+            </tbody>
+        </table>
+    } else {
+        <h5 class="text-center">No income recorded yet!</h5>
     }
+    </div>
 </div>

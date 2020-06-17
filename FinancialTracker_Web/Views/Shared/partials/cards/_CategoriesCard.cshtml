@@ -8,32 +8,37 @@
             <ul class="list-group">
 
                 @foreach( Category c in Model.Categories ) {
-                    <li class="list-group-item">
-                        <span class="category-name">@c.Name</span> <span class="category-desc">@c.Description</span>
+                    <li class="list-group-item category-list-group-item">
+                        <span class="category-name">@c.Name</span> 
+                        <span class="category-desc overflow-hidden">
+                            @c.Description
+
+                        </span>
 
                         @if( Request.RawUrl != "/" ) {
                             <span class="float-right">
-                                <span class="float-right pl-3">
-                                    <text class="text-sm">@($"{c.GetThisMonthTotalBudgetUsage():P2}") spent</text>
-                                </span>
-                                @Html.Partial("partials/buttons/_CategoryEditButton", c)
-                                @Html.Partial("partials/buttons/_CategoryDeleteButton", c)
-                                @Html.Partial("partials/buttons/_CategoryItemCreateButton", c)
+
+                                @if( c.GetTotalBudgetedAmount() > 0 ) {
+                                    <text><text class="text-sm pr-5">@($"{c.GetThisMonthTotalBudgetUsage():P2}") (@c.GetThisMonthTotalBudgetUsageAmount().ToString("$0.00") of @c.GetTotalBudgetedAmount().ToString("$0.00"))</text></text>
+                                }
+                                @Html.Partial("~/Views/Categories/_CategoryEditButton.cshtml", c)
+                                @Html.Partial("~/Views/Categories/_CategoryDeleteButton.cshtml", c)
+                                @Html.Partial("~/Views/CategoryItems/_CategoryItemCreateButton.cshtml", c)
                             </span>
                         }
 
                         @if( c.CategoryItems.Count > 0 ) {
-                            <ul class="list-group mt-3">
+                            <ul class="list-group mt-1">
                                 @foreach( CategoryItem ci in c.CategoryItems ) {
-                                    <li class="list-group-item subcategory-name">
-                                        @ci.Name <small class="subcategory-desc">@ci.Description</small>
+                                    <li class="list-group-item subcategory-list-group-item">
+                                        <span class="subcategory-name">@ci.Name</span> <small class="subcategory-desc overflow-hidden">@ci.Description</small>
                                         <span class="float-right">
-                                            <span class="float-right pl-3">
-                                                <text class="text-sm">@($"{ci.GetThisMonthBudgetUsage():P2}") spent</text>
-                                            </span>
+                                            @if( ci.AmountBudgeted != null && ci.AmountBudgeted.Value > 0 ) {
+                                                <text><text class="text-sm pr-5">@($"{ci.GetThisMonthBudgetUsage():P2}") (@ci.GetThisMonthBudgetUsageAmount().ToString("$0.00") of @ci.AmountBudgeted.Value.ToString("$0.00"))</text></text>
+                                            }
                                             @if( Request.RawUrl != "/" ) {
-                                                <text>@Html.Partial("partials/buttons/_CategoryItemEditButton", ci)</text>
-                                                <text>@Html.Partial("partials/buttons/_CategoryItemDeleteButton", ci)</text>
+                                                <text>@Html.Partial("~/Views/CategoryItems/_CategoryItemEditButton.cshtml", ci)</text>
+                                                <text>@Html.Partial("~/Views/CategoryItems/_CategoryItemDeleteButton.cshtml", ci)</text>
                                             }
                                         </span>
                                     </li>
@@ -51,7 +56,7 @@
     @if( Request.RawUrl != "/" ) {
         <div class="card-footer">
             <div class="float-right">
-                @Html.Partial("partials/buttons/_CategoryCreateButton", Model)
+                @Html.Partial("~/Views/Categories/_CategoryCreateButton.cshtml", Model)
             </div>
         </div>
     }

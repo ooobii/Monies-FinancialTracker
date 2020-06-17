@@ -32,10 +32,20 @@ namespace FinancialTracker_Web.Models
         public decimal GetThisMonthTotalBudgetUsage() {
             return GetTotalBudgetUsage(DateTime.Now.Month, DateTime.Now.Year);
         }
+        public decimal GetThisMonthTotalBudgetUsageAmount() {
+            return GetTotalBudgetUsageAmount(DateTime.Now.Month, DateTime.Now.Year);
+        }
         public decimal GetTotalBudgetUsage(int month, int year) {
             decimal output = 0;
             foreach( var ci in CategoryItems ) {
                 output += ci.GetBudgetUsage(month, year);
+            }
+            return output;
+        }
+        public decimal GetTotalBudgetUsageAmount(int month, int year) {
+            decimal output = 0;
+            foreach( var ci in CategoryItems ) {
+                output += ci.GetTransactionTotals(month, year) * -1;
             }
             return output;
         }

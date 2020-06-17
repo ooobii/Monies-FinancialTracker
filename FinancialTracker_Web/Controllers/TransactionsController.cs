@@ -1,8 +1,10 @@
-﻿using FinancialTracker_Web.Models;
+﻿using System;
+using FinancialTracker_Web.Models;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
+using Microsoft.AspNet.Identity;
 
 namespace FinancialTracker_Web.Controllers
 {
@@ -10,103 +12,53 @@ namespace FinancialTracker_Web.Controllers
     {
         private AppDbContext db = new AppDbContext();
 
-        // GET: Transactions
-        public ActionResult Index() {
-            var transactions = db.Transactions.Include(t => t.CategoryItem).Include(t => t.ParentAccount).Include(t => t.TransactionType);
-            return View(transactions.ToList());
-        }
 
-        // GET: Transactions/Details/5
-        public ActionResult Details(int? id) {
-            if( id == null ) {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Transaction transaction = db.Transactions.Find(id);
-            if( transaction == null ) {
-                return HttpNotFound();
-            }
-            return View(transaction);
-        }
-
-        // GET: Transactions/Create
-        public ActionResult Create() {
-            ViewBag.CategoryItemId = new SelectList(db.CategoryItems, "Id", "AccountName");
-            ViewBag.ParentAccountId = new SelectList(db.BankAccounts, "Id", "OwnerId");
-            ViewBag.TransactionTypeId = new SelectList(db.TransactionTypes, "Id", "AccountName");
-            return View();
-        }
-
-        // POST: Transactions/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,ParentAccountId,TransactionTypeId,CategoryItemId,OwnerId,Memo,Amount,CreatedAt")] Transaction transaction) {
+        public ActionResult Create([Bind(Include = "ParentAccountId,TransactionTypeId,CategoryItemId,Name,Memo,Amount,CreatedAt,OccuredAt")] Transaction transaction, string returnUrl) {
+            transaction.CreatedAt = DateTime.Now;
+            transaction.OwnerId = User.Identity.GetUserId();
+
             if( ModelState.IsValid ) {
                 db.Transactions.Add(transaction);
                 db.SaveChanges();
-                return RedirectToAction("Index");
             }
-
-            ViewBag.CategoryItemId = new SelectList(db.CategoryItems, "Id", "AccountName", transaction.CategoryItemId);
-            ViewBag.ParentAccountId = new SelectList(db.BankAccounts, "Id", "OwnerId", transaction.ParentAccountId);
-            ViewBag.TransactionTypeId = new SelectList(db.TransactionTypes, "Id", "AccountName", transaction.TransactionTypeId);
-            return View(transaction);
+            return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
 
-        // GET: Transactions/Edit/5
-        public ActionResult Edit(int? id) {
-            if( id == null ) {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Transaction transaction = db.Transactions.Find(id);
-            if( transaction == null ) {
-                return HttpNotFound();
-            }
-            ViewBag.CategoryItemId = new SelectList(db.CategoryItems, "Id", "AccountName", transaction.CategoryItemId);
-            ViewBag.ParentAccountId = new SelectList(db.BankAccounts, "Id", "OwnerId", transaction.ParentAccountId);
-            ViewBag.TransactionTypeId = new SelectList(db.TransactionTypes, "Id", "AccountName", transaction.TransactionTypeId);
-            return View(transaction);
-        }
-
-        // POST: Transactions/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,ParentAccountId,TransactionTypeId,CategoryItemId,OwnerId,Memo,Amount,CreatedAt")] Transaction transaction) {
+        public ActionResult Edit(EditTransactionModel model, string returnUrl) {
             if( ModelState.IsValid ) {
-                db.Entry(transaction).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                var trans = db.Transactions.Find(model.Id);
+                if( trans != null ) {
+                    trans.TransactionTypeId = model.TransactionTypeId;
+                    trans.CategoryItemId = model.CategoryItemId;
+                    trans.Memo = model.Memo;
+                    trans.Amount = model.Amount;
+                    trans.OccuredAt = model.OccuredAt;
+
+                    db.SaveChanges();
+                }
             }
-            ViewBag.CategoryItemId = new SelectList(db.CategoryItems, "Id", "AccountName", transaction.CategoryItemId);
-            ViewBag.ParentAccountId = new SelectList(db.BankAccounts, "Id", "OwnerId", transaction.ParentAccountId);
-            ViewBag.TransactionTypeId = new SelectList(db.TransactionTypes, "Id", "AccountName", transaction.TransactionTypeId);
-            return View(transaction);
+            return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
 
-        // GET: Transactions/Delete/5
-        public ActionResult Delete(int? id) {
-            if( id == null ) {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Transaction transaction = db.Transactions.Find(id);
-            if( transaction == null ) {
-                return HttpNotFound();
-            }
-            return View(transaction);
-        }
-
-        // POST: Transactions/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id) {
+        public ActionResult Delete(int id, string returnUrl) {
             Transaction transaction = db.Transactions.Find(id);
-            db.Transactions.Remove(transaction);
-            db.SaveChanges();
-            return RedirectToAction("Index");
+            if( transaction != null ) {
+                db.Transactions.Remove(transaction);
+                db.SaveChanges();
+            }
+            return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }
+
+
+
+
+
 
         protected override void Dispose(bool disposing) {
             if( disposing ) {
@@ -114,5 +66,17 @@ namespace FinancialTracker_Web.Controllers
             }
             base.Dispose(disposing);
         }
+
+
+
+
+        #region Helpers 
+        private ActionResult RedirectToLocal(string returnUrl, ActionResult fallback = null) {
+            if( Url.IsLocalUrl(returnUrl) ) {
+                return Redirect(returnUrl);
+            }
+            return fallback ?? RedirectToAction("Index", "Home");
+        }
+        #endregion
     }
 }
