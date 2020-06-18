@@ -5,8 +5,11 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
 using System;
+using System.Net;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Web.Configuration;
 
 namespace FinancialTracker_Web
 {
@@ -16,6 +19,29 @@ namespace FinancialTracker_Web
             // Plug in your email service here to send an email.
             return Task.FromResult(0);
         }
+
+        public async Task SendAsync(MailMessage message) {
+            var emailUsername = WebConfigurationManager.AppSettings[ "emailsvcusr" ];
+            var emailPassword = WebConfigurationManager.AppSettings[ "emailsvcpsw" ];
+            var emailHost = WebConfigurationManager.AppSettings[ "emailsvchost" ];
+            var emailPort = int.Parse(WebConfigurationManager.AppSettings[ "emailsvcport" ]);
+
+            using( var smtp = new SmtpClient() {
+                Host = emailHost,
+                Port = emailPort,
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(emailUsername, emailPassword)
+            } ) {
+                try {
+                    await smtp.SendMailAsync(message);
+                } catch( Exception ex ) {
+                    Console.WriteLine(ex.ToString());
+                }
+            }
+        }
+
     }
 
     public class SmsService : IIdentityMessageService

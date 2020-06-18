@@ -1,10 +1,14 @@
-﻿using FinancialTracker_Web.Models;
+﻿using System;
+using System.Diagnostics;
+using FinancialTracker_Web.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using System.Linq;
+using System.Net.Mail;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Configuration;
 using System.Web.Mvc;
 
 namespace FinancialTracker_Web.Controllers
@@ -57,6 +61,15 @@ namespace FinancialTracker_Web.Controllers
         public async Task<ActionResult> Login(LoginViewModel model, string returnUrl) {
             if( !ModelState.IsValid ) {
                 return View(model);
+            }
+
+            //Check to see if the email was confirmed (if user exists).
+            var user = await UserManager.FindByNameAsync(model.Email);
+            if( user != null ) {
+                if( !await UserManager.IsEmailConfirmedAsync(user.Id) ) {
+                    ModelState.AddModelError("", "You need to confirm your email in order to login.");
+                    return View(model);
+                }
             }
 
             // This doesn't count login failures towards account lockout
@@ -136,13 +149,40 @@ namespace FinancialTracker_Web.Controllers
                 var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if( result.Succeeded ) {
-                    await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                    //this is commented out to prevent the user from being signed in until email is confirmed.
+                    //await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
 
-                    // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
-                    // Send an email with this link
-                    // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                    // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                    // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
+                    //create confirmation code and callback URL to trigger email confirmation.
+                    string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+                    var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+
+                    //begin attempt to send email
+                    try {
+                        //fetch 'from' from configuration
+                        var from = new System.Net.Mail.MailAddress(WebConfigurationManager.AppSettings[ "emailsvcusr" ], WebConfigurationManager.AppSettings[ "emailsvcdisplay" ]);
+                        var emailMsg = new MailMessage(from.ToString(), user.Email) {
+                            Subject = $"Simplicita: Confirm your account, {user.GetFullName()}!",
+                            Body = "<p>Thank you for registering! We're glad to have you.</p>" +
+                                  $"<p>To activate your account, please <a href=\"{callbackUrl}\">click here</a>! After confirming your email, you will be able to login.</p>",
+                            IsBodyHtml = true
+                        };
+
+                        var emailSvc = new EmailService();
+                        await emailSvc.SendAsync(emailMsg);
+
+                        //redirect to confirmation sent, since login never occured (notify user of requirement to confirm).
+                        ViewBag.EmailSentTo = user.Email;
+                        return View("ConfirmationSent");
+                    } catch( Exception ex ) {
+                        //delete user since confirmation email failed to send.
+                        await UserManager.DeleteAsync(user);
+
+                        //print to IIS log
+                        Console.WriteLine(ex.ToString());
+
+                        //add error to model state
+                        ModelState.AddModelError("Email Send Failure", "The account was not created. The confirmation email was unable to be sent, but is required for login. This erorr has been reported, please try again later.");
+                    }
 
                     return RedirectToAction("Index", "Home");
                 }
@@ -162,6 +202,47 @@ namespace FinancialTracker_Web.Controllers
             }
             var result = await UserManager.ConfirmEmailAsync(userId, code);
             return View(result.Succeeded ? "ConfirmEmail" : "Error");
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult ResendEmailConfirmation() {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> ResendEmailConfirmation(ForgotPasswordViewModel model) {
+            var user = await UserManager.FindByNameAsync(model.Email);
+
+            if( user != null ) {
+                string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+                var callbackUrl = Url.Action("ConfirmEmail", "Account", new {
+                    userId = user.Id,
+                    code = code
+                }, protocol: Request.Url.Scheme);
+
+                try {
+                    var from = new System.Net.Mail.MailAddress(WebConfigurationManager.AppSettings[ "emailsvcusr" ], WebConfigurationManager.AppSettings[ "emailsvcdisplay" ]);
+                    var emailMsg = new MailMessage(from.ToString(), user.Email) {
+                        Subject = $"Simplicita: Confirm your account, {user.GetFullName()}!",
+                        Body = "<p>Here is a new copy of a confirmation email for your account.</p>" +
+                               $"<p>Please <a href=\"{callbackUrl}\">click here</a>! After confirming your email, you will be able to login.</p>",
+                        IsBodyHtml = true
+                    };
+
+                    var emailSvc = new EmailService();
+                    await emailSvc.SendAsync(emailMsg);
+
+                    ViewBag.EmailSentTo = user.Email;
+                } catch( Exception ex ) {
+                    //print error to IIS log
+                    Debug.WriteLine(ex.ToString());
+                }
+            }
+
+            return View("ConfirmationSent");
         }
 
         //

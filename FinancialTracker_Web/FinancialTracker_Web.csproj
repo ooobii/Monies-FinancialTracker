@@ -476,6 +476,8 @@
     <Content Include="Views\Transactions\_TransactionCreateButton.cshtml" />
     <Content Include="Views\Transactions\_TransactionEditButton.cshtml" />
     <Content Include="Views\Transactions\_TransactionDeleteButton.cshtml" />
+    <Content Include="Views\Account\ConfirmationSent.cshtml" />
+    <Content Include="Views\Account\ResendEmailConfirmation.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

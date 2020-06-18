@@ -1,22 +1,10 @@
-﻿/*Login & Registraion pages*/
-.login-page, .register-page {
-    background-color: #211D28;
-}
-
-.login-logo-image {
-    width: 58px;
+﻿
+.login-logo {
+    color: darkgreen !important;
+    font-family: 'Impact';
+    font-size: 60px;
     vertical-align: middle;
 }
-
-.login-logo {
-    padding-bottom: 15px;
-}
-
-    .login-logo a {
-        color: white;
-        font-size: 60px;
-        vertical-align: middle;
-    }
 
 .login-card-body, .register-card-body {
     background: #F0F0F0
