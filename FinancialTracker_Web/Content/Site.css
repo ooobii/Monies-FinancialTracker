@@ -13,6 +13,14 @@
     text-align: center;
 }
 
+.bg-danger-lite {
+    border: 1px solid red;
+    background-color: #ffbbbb;
+}
+.subcategory-list-group-item.bg-danger-lite > .subcategory-desc {
+    color: black;
+}
+
 .balance-lg {
     font-size: 2.6rem;
     text-align: center;

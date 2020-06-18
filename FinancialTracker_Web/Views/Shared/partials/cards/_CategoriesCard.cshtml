@@ -28,13 +28,13 @@
                         }
 
                         @if( c.CategoryItems.Count > 0 ) {
-                            <ul class="list-group mt-1">
+                            <ul class="list-group mt-2 mb-2 mr-5">
                                 @foreach( CategoryItem ci in c.CategoryItems ) {
-                                    <li class="list-group-item subcategory-list-group-item">
+                                    <li class="list-group-item subcategory-list-group-item @(ci.GetThisMonthBudgetUsage() > 1 ? Html.Raw("bg-danger-lite") : Html.Raw(""))">
                                         <span class="subcategory-name">@ci.Name</span> <small class="subcategory-desc overflow-hidden">@ci.Description</small>
                                         <span class="float-right">
                                             @if( ci.AmountBudgeted != null && ci.AmountBudgeted.Value > 0 ) {
-                                                <text><text class="text-sm pr-5">@($"{ci.GetThisMonthBudgetUsage():P2}") (@ci.GetThisMonthBudgetUsageAmount().ToString("$0.00") of @ci.AmountBudgeted.Value.ToString("$0.00"))</text></text>
+                                                <text><text class="text-sm @(ci.GetThisMonthBudgetUsage() > 1 ? Html.Raw("text-danger text-bold") : Html.Raw("")) pr-5">@($"{ci.GetThisMonthBudgetUsage():P2}") (@ci.GetThisMonthBudgetUsageAmount().ToString("$0.00") of @ci.AmountBudgeted.Value.ToString("$0.00"))</text></text>
                                             }
                                             @if( Request.RawUrl != "/" ) {
                                                 <text>@Html.Partial("~/Views/CategoryItems/_CategoryItemEditButton.cshtml", ci)</text>
