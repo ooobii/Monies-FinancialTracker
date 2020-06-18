@@ -13,41 +13,41 @@
         
         <div class="row row-cols-1">
             <div class="col">
-                <label for="name">Account Name:</label>
+                <label>Account Name:</label>
             </div>
             <div class="col pb-2 mb-2 border-bottom">
-                <input type="text" id="name" name="AccountName" placeholder="Type a name..." class="full-width" />
+                <input type="text" name="AccountName" placeholder="Type a name..." class="full-width" />
             </div>
             <div class="col">
-                <label for="accType">Type:</label>
+                <label>Type:</label>
             </div>
             <div class="col pb-2 mb-2 border-bottom">
-                <select class="custom-select text-sm" id="accType" name="AccountTypeId">
+                <select class="custom-select text-sm" name="AccountTypeId">
                     @foreach(KeyValuePair<int, string> bat in accTypes) {
                         <option value="@bat.Key">@bat.Value</option>
                     }
                 </select>
             </div>
             <div class="col">
-                <label for="startbal">Starting Balance:</label>
+                <label>Starting Balance:</label>
             </div>
             <div class="col pb-2 mb-2 border-bottom">
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <span class="input-group-text">$</span>
                     </div>
-                    <input type="number" step=".01" class="form-control text-right pr-2" id="startbal" name="StartingBalance">
+                    <input type="number" step=".01" class="form-control text-right pr-2" name="StartingBalance">
                 </div>
             </div>
             <div class="col">
-                <label for="lowbal">Low Balance Warning Amount:</label>
+                <label>Low Balance Warning Amount:</label>
             </div>
             <div class="col pb-2 mb-2 border-bottom">
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <span class="input-group-text">$</span>
                     </div>
-                    <input type="number" step=".01" class="form-control text-right" id="lowbal" name="LowBalanceAlertThreshold">
+                    <input type="number" step=".01" class="form-control text-right" name="LowBalanceAlertThreshold">
                 </div>
             </div>
             <div class="col">

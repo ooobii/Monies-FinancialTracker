@@ -2,12 +2,15 @@
 @using Microsoft.AspNet.Identity
 
 @model CategoryItem
+@{
+    var id = Model.Id;
+}
 
-<button type="button" id="editCategoryItem@(Model.Id)_btn" class="btn btn-sm btn-outline-warning btn-popover"><i class="fas fa-pencil-alt"></i></button>
-<div id="editCategoryItem@(Model.Id)_form" style="display:none">
+<button type="button" id="editCategoryItem@(id)_btn" class="btn btn-sm btn-outline-warning btn-popover"><i class="fas fa-pencil-alt"></i></button>
+<div id="editCategoryItem@(id)_form" style="display:none">
     @using( Html.BeginForm("Edit", "CategoryItems", FormMethod.Post) ) {
         @Html.AntiForgeryToken()
-        @Html.Hidden("Id", Model.Id)
+        <input name="Id" type="hidden" value="@id">
         @Html.Hidden("returnUrl", Request.RawUrl)
         @Html.Hidden("ParentCategoryId", Model.ParentCategoryId)
 
@@ -44,11 +47,11 @@
 
 
 <script>
-    $('#editCategoryItem@(Model.Id)_btn').popover({
+    $('#editCategoryItem@(id)_btn').popover({
         placement: 'bottom',
         title: 'Edit Subcategory: @Model.Name',
         html: true,
         sanitize: false,
-        content: $('#editCategoryItem@(Model.Id)_form').html()
+        content: $('#editCategoryItem@(id)_form').html()
     });
 </script>

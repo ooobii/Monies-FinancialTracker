@@ -2,12 +2,15 @@
 @using Microsoft.AspNet.Identity
 
 @model BankAccount
-<button type="button" id="delAccount@(Model.Id)_btn" class="btn btn-sm btn-outline-danger btn-popover"><i class="fas fa-times"></i></button>
-<div id="delAccount@(Model.Id)_form" style="display:none">
+    @{
+        var id = Model.Id;
+    }
+<button type="button" id="delAccount@(id)_btn" class="btn btn-sm btn-outline-danger btn-popover"><i class="fas fa-times"></i></button>
+<div id="delAccount@(id)_form" style="display:none">
     @using( Html.BeginForm("Delete", "BankAccounts", FormMethod.Post) ) {
         @Html.AntiForgeryToken()
-        @Html.Hidden("Id", Model.Id)
-        
+        <input name="Id" type="hidden" value="@id">
+
         <div class="row row-cols-1">
             <div class="col pb-2 mb-2 border-bottom">
                 <p>All transactions within this account will be permanently deleted!</p>
@@ -21,12 +24,12 @@
 
 
 <script>
-    $('#delAccount@(Model.Id)_btn').popover({
+    $('#delAccount@(id)_btn').popover({
         placement: 'bottom',
         title: 'Delete @Model.AccountName?',
         html: true,
         sanitize: false,
-        content: $('#delAccount@(Model.Id)_form').html()
+        content: $('#delAccount@(id)_form').html()
     });
 
 </script>

@@ -26,12 +26,12 @@
 
 
 <script>
-    $('#delTransaction@(Model.Id)_btn').popover({
+    $('#delTransaction@(id)_btn').popover({
         placement: 'bottom',
         title: 'Delete @Model.Name?',
         html: true,
         sanitize: false,
-        content: $('#delTransaction@(Model.Id)_form').html()
+        content: $('#delTransaction@(id)_form').html()
     });
 
 </script>
