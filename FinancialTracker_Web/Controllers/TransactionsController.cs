@@ -34,6 +34,7 @@ namespace FinancialTracker_Web.Controllers
                 if( trans != null ) {
                     trans.TransactionTypeId = model.TransactionTypeId;
                     trans.CategoryItemId = model.CategoryItemId;
+                    trans.Name = model.Name;
                     trans.Memo = model.Memo;
                     trans.Amount = model.Amount;
                     trans.OccuredAt = model.OccuredAt;
