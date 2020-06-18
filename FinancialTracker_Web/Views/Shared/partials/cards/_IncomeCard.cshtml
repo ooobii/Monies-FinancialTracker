@@ -22,14 +22,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach( Transaction t in Model.Transactions.Where(t => t.TransactionType.IsIncome == false)
+                    @foreach( Transaction t in Model.Transactions.Where(t => t.TransactionType.IsIncome)
                         .OrderBy(t => t.OccuredAt) ) {
                         <tr>
                             <td>@t.OccuredAt.ToString("M/d/yy h:mm tt")</td>
                             <td>@t.Name</td>
                             <td>
                                 @if( t.GetAmount() > 0 ) {
-                                    <span class="text-sm text-bold text-success">- @t.Amount.ToString("$0.00")</span>
+                                    <span class="text-sm text-bold text-success">+ @t.Amount.ToString("$0.00")</span>
                                 } else {
                                     <span class="text-sm text-bold text-danger">@t.Amount.ToString("$0.00")</span>
                                 }
