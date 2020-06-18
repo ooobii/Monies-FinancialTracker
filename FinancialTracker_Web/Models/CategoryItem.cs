@@ -22,7 +22,9 @@ namespace FinancialTracker_Web.Models
         public string Description { get; set; }
 
         public decimal? AmountBudgeted { get; set; }
-
+        public decimal GetAmountBudgeted() {
+            return AmountBudgeted == null ? 0 : AmountBudgeted.Value;
+        }
 
 
         public decimal GetThisMonthBudgetUsage() {

@@ -37,9 +37,18 @@ namespace FinancialTracker_Web.Models
         }
         public decimal GetTotalBudgetUsage(int month, int year) {
             decimal output = 0;
+            decimal budget = 0;
+            decimal spent = 0;
+
             foreach( var ci in CategoryItems ) {
-                output += ci.GetBudgetUsage(month, year);
+                budget += ci.GetAmountBudgeted();
+                spent += ci.GetTransactionTotals(month, year);
             }
+
+            if (spent > 0) { spent = 0; }
+            else { spent *= -1;  }
+
+            output = spent / budget;
             return output;
         }
         public decimal GetTotalBudgetUsageAmount(int month, int year) {
