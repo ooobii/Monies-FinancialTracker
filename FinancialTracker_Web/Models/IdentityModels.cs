@@ -88,12 +88,13 @@ namespace FinancialTracker_Web.Models
             return new AppDbContext();
         }
 
-        public System.Data.Entity.DbSet<FinancialTracker_Web.Models.BankAccount> BankAccounts { get; set; }
-        public System.Data.Entity.DbSet<FinancialTracker_Web.Models.BankAccountType> BankAccountTypes { get; set; }
-        public System.Data.Entity.DbSet<FinancialTracker_Web.Models.Household> Households { get; set; }
-        public System.Data.Entity.DbSet<FinancialTracker_Web.Models.Category> Categories { get; set; }
-        public System.Data.Entity.DbSet<FinancialTracker_Web.Models.CategoryItem> CategoryItems { get; set; }
-        public System.Data.Entity.DbSet<FinancialTracker_Web.Models.TransactionType> TransactionTypes { get; set; }
-        public System.Data.Entity.DbSet<FinancialTracker_Web.Models.Transaction> Transactions { get; set; }
+        public System.Data.Entity.DbSet<BankAccount> BankAccounts { get; set; }
+        public System.Data.Entity.DbSet<BankAccountType> BankAccountTypes { get; set; }
+        public System.Data.Entity.DbSet<Household> Households { get; set; }
+        public System.Data.Entity.DbSet<Category> Categories { get; set; }
+        public System.Data.Entity.DbSet<CategoryItem> CategoryItems { get; set; }
+        public System.Data.Entity.DbSet<TransactionType> TransactionTypes { get; set; }
+        public System.Data.Entity.DbSet<Transaction> Transactions { get; set; }
+        public System.Data.Entity.DbSet<Invitation> Invitations { get; set; }
     }
 }
