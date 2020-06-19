@@ -8,6 +8,7 @@ using System.Web.Mvc;
 
 namespace FinancialTracker_Web.Controllers
 {
+    [Authorize]
     public class HouseholdsController : Controller
     {
         private AppDbContext db = new AppDbContext();
@@ -64,6 +65,29 @@ namespace FinancialTracker_Web.Controllers
         }
 
 
+        [HttpGet]
+        public ActionResult ProcessInvitation(int inviteId) {
+            var inviteResult = Invitation.ProcessInvite(db, inviteId, User);
+            switch( inviteResult ) {
+                case Invitation.InviteResult.FailureNoInvite:
+                    TempData.Add("alertDangerInvite", "We were unable to locate the invite you requested. Please try again.");
+                    break;
+
+                case Invitation.InviteResult.FailureInvalidInvite:
+                    TempData.Add("alertInfoInvite", "We're sorry, but this invite has expired, or cannot be processed anymore!");
+                    break;
+
+                case Invitation.InviteResult.FailureBadCaller:
+                    TempData.Add("alertDangerInvite", "We're sorry, but you are not the intended recipient of this invite. Please try again.");
+                    break;
+                case Invitation.InviteResult.Success:
+                    TempData.Add("alertSuccessInvite", $"Invitation Accepted! Welcome to the {db.Invitations.Find(inviteId).ParentHousehold.Name} household!");
+                    break;
+                default:
+                    break;
+            }
+            return RedirectToAction("Index", "Home");
+        }
 
 
 
