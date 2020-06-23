@@ -317,6 +317,7 @@
     <Content Include="Scripts\adminlte\adminlte.min.js.map" />
     <None Include="bundleconfig.json" />
     <Content Include="creds.private.config" />
+    <None Include="Properties\PublishProfiles\monies-demo.matthewwendel.info.pubxml" />
     <None Include="Scripts\jquery-3.5.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.5.1.js" />
     <Content Include="Scripts\jquery-3.5.1.min.js" />
