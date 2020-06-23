@@ -20,8 +20,13 @@ namespace FinancialTracker_Web.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             BankAccount bankAccount = db.BankAccounts.Find(id);
-            if( bankAccount == null || bankAccount.ParentHousehold.Id != ApplicationUser.GetParentHousehold(User).Id ) {
+            var parentHouseholdId = ApplicationUser.GetParentHouseholdId(User);
+            if( bankAccount == null ) {
                 return HttpNotFound();
+            }
+            if( bankAccount.ParentHousehold.Id != parentHouseholdId ) {
+                TempData.Add("LoginMessageDanger", "You are not authorized to access this resource. Please login with an account that is allowed to view this resource.");
+                return new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
             }
             return View(bankAccount);
         }

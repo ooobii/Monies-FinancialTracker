@@ -17,12 +17,8 @@
     </div>
 </div>
 
-<div class="row pt-3 border-top">
-    <div class="col">
-
-        <p>
-            @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
-            @Html.ActionLink("Back to Household", "Details", "Households")
-        </p>
+<div class="row pt-3 pb-4 border-top">
+    <div class="col text-right">
+        @Html.Partial("~/Views/Households/_HouseholdEditButton.cshtml", Model)
     </div>
 </div>

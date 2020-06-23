@@ -1,4 +1,10 @@
-﻿@using FinancialTracker_Web.Models.ViewModels
+﻿@using FinancialTracker_Web.Models
+@using FinancialTracker_Web.Models.ViewModels
+
+@{
+    var usr = ApplicationUser.GetFromDb(User);
+
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -70,39 +76,62 @@
                         <li class="nav-item">
                             <a href="@Url.Action("Index", "Home")" class="nav-link">Home</a>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">Dropdown</a>
-                            <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
-                                <li><a href="#" class="dropdown-item">Some action </a></li>
-                                <li><a href="#" class="dropdown-item">Some other action</a></li>
+                        @if( usr.HouseholdId != null ) {
+                            <li class="nav-item dropdown">
+                                <a id="dropdownSubMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">@usr.Household.Name</a>
+                                <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">
+                                    <li><a href="@Url.Action("Details", "Households")" class="dropdown-item">Go To Household... </a></li>
+                                </ul>
+                            </li>
 
-                                <li class="dropdown-divider"></li>
-
-                                <!-- Level two dropdown-->
-                                <li class="dropdown-submenu dropdown-hover">
-                                    <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="dropdown-item dropdown-toggle">Hover for action</a>
-                                    <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
-                                        <li>
-                                            <a tabindex="-1" href="#" class="dropdown-item">level 2</a>
-                                        </li>
-
-                                        <!-- Level three dropdown-->
-                                        <li class="dropdown-submenu">
-                                            <a id="dropdownSubMenu3" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="dropdown-item dropdown-toggle">level 2</a>
-                                            <ul aria-labelledby="dropdownSubMenu3" class="dropdown-menu border-0 shadow">
-                                                <li><a href="#" class="dropdown-item">3rd level</a></li>
-                                                <li><a href="#" class="dropdown-item">3rd level</a></li>
-                                            </ul>
-                                        </li>
-                                        <!-- End Level three -->
-
-                                        <li><a href="#" class="dropdown-item">level 2</a></li>
-                                        <li><a href="#" class="dropdown-item">level 2</a></li>
+                            if( usr.Household.BankAccounts.Count > 0 ) {
+                                <li class="nav-item dropdown">
+                                    <a id="dropdownSubMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">Bank Accounts</a>
+                                    <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow" style="width:24rem;">
+                                        @foreach( BankAccount ba in usr.Household.BankAccounts ) {
+                                            <li>
+                                                <a href="@Url.Action("Details", "BankAccounts", new { id = ba.Id })" class="dropdown-item">
+                                                    @ba.AccountName <span class="dropdown-desc text-sm text-secondary">@ba.GetCurrentBalance().ToString("$0.00")</span>
+                                                </a>
+                                            </li>
+                                        }
                                     </ul>
                                 </li>
-                                <!-- End Level two -->
-                            </ul>
-                        </li>
+                            }
+
+
+                            if( usr.Household.Categories.Count > 0 ) {
+                                <li class="nav-item dropdown">
+                                    <a id="dropdownSubMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">Categories</a>
+                                    <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+                                        @foreach( Category c in usr.Household.Categories ) {
+                                            if( c.CategoryItems.Count > 0 ) {
+                                                <li class="dropdown-submenu dropdown-hover">
+                                                    <a id="dropdownSubMenu2" href="@Url.Action("Details", "Categories", new { id = c.Id })" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="dropdown-item dropdown-toggle">@c.Name</a>
+                                                    <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow" style="width:16rem;">
+                                                        @foreach( CategoryItem ci in c.CategoryItems ) {
+                                                            <li>
+                                                                <a href="@Url.Action("Details", "CategoryItems", new { id = ci.Id })" class="dropdown-item">
+                                                                    @ci.Name <span class="dropdown-desc float-right text-sm text-secondary">@($"{ci.GetThisMonthBudgetUsage():P2}") this month</span>
+                                                                </a>
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </li>
+                                            } else {
+                                                <li>
+                                                    <a href="@Url.Action("Details", "Categories", new { id = c.Id })" class="dropdown-item">
+                                                        @c.Name - @($"{c.GetThisMonthTotalBudgetUsage():P2}")
+                                                    </a>
+                                                </li>
+                                            }
+                                        }
+                                    </ul>
+                                </li>
+                            }
+
+                        }
+
                     </ul>
                 </div>
 

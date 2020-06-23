@@ -14,7 +14,7 @@
                         <th rowspan="2" class="pt-5">Name</th>
                         <th rowspan="2" class="pt-5">Amount</th>
                         <th colspan="2" class="text-center">Added</th>
-                        <th rowspan="2" style="width:15px;"></th>
+                        <th rowspan="2" style="width:50px;"></th>
                     </tr>
                     <tr>
                         <th class="text-center">At</th>
@@ -23,7 +23,7 @@
                 </thead>
                 <tbody>
                     @foreach( Transaction t in Model.Transactions.Where(t => t.TransactionType.IsIncome)
-                        .OrderBy(t => t.OccuredAt) ) {
+                        .OrderByDescending(t => t.OccuredAt) ) {
                         <tr>
                             <td>@t.OccuredAt.ToString("M/d/yy h:mm tt")</td>
                             <td>@t.Name</td>
@@ -36,9 +36,10 @@
                             </td>
                             <td>@t.CreatedAt.ToString("M/d/yy h:mm tt")</td>
                             <td>@t.Owner.GetFullName()</td>
-                            <td style="width:15px;">
+                            <td style="width:50px;">
                                 @if( t.OwnerId == User.Identity.GetUserId() ) {
                                     @Html.Partial("~/Views/Transactions/_TransactionEditButton.cshtml", t)
+                                    @Html.Partial("~/Views/Transactions/_TransactionDeleteButton.cshtml", t)
                                 }
                             </td>
                         </tr>

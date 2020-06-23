@@ -23,7 +23,7 @@
                 </thead>
                 <tbody>
                     @foreach( Transaction t in Model.Transactions.Where(t => t.TransactionType.IsIncome == false)
-                        .OrderBy(t => t.OccuredAt) ) {
+                        .OrderByDescending(t => t.OccuredAt) ) {
                         <tr>
                             <td>@t.OccuredAt.ToString("M/d/yy h:mm tt")</td>
                             <td>@t.Name</td>

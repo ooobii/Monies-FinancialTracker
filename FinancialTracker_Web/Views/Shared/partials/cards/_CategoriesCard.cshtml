@@ -5,11 +5,10 @@
     <div class="card-header card-header-md bg-gradient-purple"><i class="fas fa-funnel-dollar mr-3"></i>Categories</div>
     <div class="card-body">
         @if( Model.Categories.Count > 0 ) {
-            <ul class="list-group">
-
-                @foreach( Category c in Model.Categories ) {
+            foreach( Category c in Model.Categories ) {
+                <ul class="list-group mb-4">
                     <li class="list-group-item category-list-group-item">
-                        <span class="category-name">@c.Name</span> 
+                        <span class="category-name">@c.Name</span>
                         <span class="category-desc overflow-hidden">
                             @c.Description
 
@@ -28,7 +27,7 @@
                         }
 
                         @if( c.CategoryItems.Count > 0 ) {
-                            <ul class="list-group mt-2 mb-2 mr-5">
+                            <ul class="list-group mt-3 mb-2 mr-5">
                                 @foreach( CategoryItem ci in c.CategoryItems ) {
                                     <li class="list-group-item subcategory-list-group-item @(ci.GetThisMonthBudgetUsage() > 1 ? Html.Raw("bg-danger-lite") : Html.Raw(""))">
                                         <span class="subcategory-name">@ci.Name</span> <small class="subcategory-desc overflow-hidden">@ci.Description</small>
@@ -46,8 +45,8 @@
                             </ul>
                         }
                     </li>
-                }
-            </ul>
+                </ul>
+            }
         } else {
             <h5 class="text-center">No transaction categories yet!</h5>
         }

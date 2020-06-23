@@ -39,7 +39,12 @@
 
                 @using( Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }) ) {
                     @Html.AntiForgeryToken()
-                    <p class="login-box-msg text-danger text-sm">@Html.ValidationMessage("")</p>
+                    if( !string.IsNullOrEmpty(Html.ValidationMessage("").ToString()) ) {
+                        <p class="login-box-msg text-danger text-sm">@Html.ValidationMessage("")</p>
+                    }
+                    if( TempData.Keys.Contains("LoginMessageDanger") ) {
+                        <p class="login-box-msg text-danger text-sm">@TempData[ "LoginMessageDanger" ]</p>
+                    }
                     <div class="input-group mb-3">
                         <input type="email" class="form-control" placeholder="Email" name="Email">
                         <div class="input-group-append">
@@ -74,7 +79,7 @@
                 }
 
                 @Html.Partial("_ExternalLoginsListPartial", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })
-                
+
                 <!-- /.social-auth-links -->
                 <hr />
                 <p class="mb-1">

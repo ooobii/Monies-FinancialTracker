@@ -18,23 +18,27 @@
                     </thead>
                     <tbody>
                         @foreach( BankAccount acc in Model.BankAccounts ) {
-                            <tr>
-                                <td>
-                                    <a class="pr-3" href="@Url.Action("Details", "BankAccounts", new { id = acc.Id })">
-                                        @acc.AccountName
-                                    </a>
+                        <tr>
+                            <td>
+                                <a class="pr-3" href="@Url.Action("Details", "BankAccounts", new { id = acc.Id })">
+                                    @acc.AccountName
+                                </a>
 
-                                    @if( acc.OwnerId == User.Identity.GetUserId() && Request.RawUrl != "/" ) {
-                                        <div class="float-right">
-                                            @Html.Partial("~/Views/BankAccounts/_BankAccountEditButton.cshtml", acc)
-                                            @Html.Partial("~/Views/BankAccounts/_BankAccountDeleteButton.cshtml", acc)
-                                        </div>
+                                @if( acc.OwnerId == User.Identity.GetUserId() && Request.RawUrl != "/" ) {
+                                    <div class="float-right">
+                                        @Html.Partial("~/Views/BankAccounts/_BankAccountEditButton.cshtml", acc)
+                                        @Html.Partial("~/Views/BankAccounts/_BankAccountDeleteButton.cshtml", acc)
+                                    </div>
 
-                                    }
-                                </td>
-                                <td class="text-center">@acc.AccountType.Name</td>
-                                <td class="text-right">@acc.GetCurrentBalance()</td>
-                            </tr>
+                                }
+                            </td>
+                            <td class="text-center">@acc.AccountType.Name</td>
+                            @if( acc.GetCurrentBalance() > 0 ) {
+                                <td class="text-right text-success text-bold">@acc.GetCurrentBalance().ToString("$ 0.00")</td>
+                            } else {
+                                <td class="text-right text-danger text-bold">@acc.GetCurrentBalance().ToString("$ -0.00")</td>
+                            }
+                        </tr>
                         }
                     </tbody>
                 </table>

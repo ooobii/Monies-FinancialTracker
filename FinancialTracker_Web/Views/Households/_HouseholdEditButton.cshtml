@@ -3,8 +3,14 @@
 @{
     var id = Model.Id;
 }
-<button type="button" id="createHouse_btn" class="btn btn-lg btn-block btn-outline-primary">Create a New Household</button>
-<div id="createHouse_form" style="display:none">
+
+@if(Request.RawUrl != "/" ) {
+    <button id="editHouse_btn" type="button" class="btn btn-warning btn-popover">Edit Household</button>
+} else {
+    <button id="editHouse_btn" type="button" class="btn btn-block btn-warning btn-popover">Edit Household</button>
+}
+
+<div id="editHouse_form" style="display:none">
     @using( Html.BeginForm("Edit", "Households", FormMethod.Post) ) {
         @Html.AntiForgeryToken()
         <input name="Id" type="hidden" value="@id">
@@ -29,13 +35,12 @@
     }
 </div>
 
-
 <script>
-    $('#createHouse_btn').popover({
-        placement: 'left',
+    $('#editHouse_btn').popover({
+        placement: '@(Request.RawUrl == "/" ? Html.Raw("left") : Html.Raw("top"))',
         title: 'Edit Household: @Model.Name',
         html: true,
         sanitize: false,
-        content: $('#createHouse_form').html()
+        content: $('#editHouse_form').html()
     })
 </script>

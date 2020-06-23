@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Web.Mvc;
 using Antlr.Runtime;
+using WebGrease.Css.Extensions;
 
 namespace FinancialTracker_Web.Controllers
 {
@@ -12,7 +13,13 @@ namespace FinancialTracker_Web.Controllers
         private AppDbContext db = new AppDbContext();
 
 
+        public ActionResult Details(int? id) {
+            if(id == null) { return new HttpStatusCodeResult(HttpStatusCode.BadRequest); }
+            var ci = db.CategoryItems.Find(id);
+            if(ci == null) { return new HttpStatusCodeResult(HttpStatusCode.NotFound); }
 
+            return View(ci);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -43,9 +50,25 @@ namespace FinancialTracker_Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, string returnUrl) {
-            CategoryItem categoryItem = db.CategoryItems.Find(id);
-            
+            var categoryItem = db.CategoryItems.Find(id);
+            if(categoryItem == null) { return new HttpStatusCodeResult(HttpStatusCode.BadRequest); }
+
+            var category = db.Categories.Find(categoryItem.ParentCategoryId);
+            if( category == null) { return new HttpStatusCodeResult(HttpStatusCode.BadRequest); }
+
+            //remove transactions from category item, and set them to uncategorized.
+            var transactions = db.Transactions.Where(t => t.CategoryItemId == categoryItem.Id).ToList();
+            foreach(var t in transactions) {
+                t.CategoryItemId = null;
+            }
+
+            //remove category item from parent category.
+            category.CategoryItems.Remove(categoryItem);
+
+            //remove category item from db
             db.CategoryItems.Remove(categoryItem);
+
+            //save and direct to return
             db.SaveChanges();
             return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
         }

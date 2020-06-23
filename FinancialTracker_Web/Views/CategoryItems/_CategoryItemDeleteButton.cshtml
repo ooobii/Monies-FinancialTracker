@@ -5,9 +5,9 @@
 @{
     var id = Model.Id;
 }
-<button type="button" id="delCategory@(id)_btn" class="btn btn-sm btn-outline-danger btn-popover"><i class="fas fa-times"></i></button>
-<div id="delCategory@(id)_form" style="display:none">
-    @using( Html.BeginForm("Delete", "Categories", FormMethod.Post) ) {
+<button type="button" id="delCategoryItem@(id)_btn" class="btn btn-sm btn-outline-danger btn-popover"><i class="fas fa-times"></i></button>
+<div id="delCategoryItem@(id)_form" style="display:none">
+    @using( Html.BeginForm("Delete", "CategoryItems", FormMethod.Post) ) {
         @Html.AntiForgeryToken()
         <input name="Id" type="hidden" value="@id">
 
@@ -25,12 +25,12 @@
 
 
 <script>
-    $('#delCategory@(id)_btn').popover({
+    $('#delCategoryItem@(id)_btn').popover({
         placement: 'bottom',
         title: 'Delete @Model.Name?',
         html: true,
         sanitize: false,
-        content: $('#delCategory@(id)_form').html()
+        content: $('#delCategoryItem@(id)_form').html()
     });
 
 </script>

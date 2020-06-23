@@ -48,8 +48,12 @@ namespace FinancialTracker_Web.Models
             if (spent > 0) { spent = 0; }
             else { spent *= -1;  }
 
-            output = spent / budget;
-            return output;
+            if( budget > 0 ) {
+                output = spent / budget;
+                return output;
+            } else {
+                return 0;
+            }
         }
         public decimal GetTotalBudgetUsageAmount(int month, int year) {
             decimal output = 0;

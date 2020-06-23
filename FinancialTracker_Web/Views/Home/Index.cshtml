@@ -1,5 +1,6 @@
 ﻿@using FinancialTracker_Web.Models
 @using FinancialTracker_Web.Models.ViewModels
+@using Microsoft.AspNet.Identity
 
 @model HomeIndexViewModel
 
@@ -14,7 +15,7 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-9">
             @if( Model.Household != null ) {
                 <div class="card card-primary">
                     <div class="card-header card-header-lg bg-gradient-blue">Your Household</div>
@@ -60,20 +61,17 @@
                 </div>
             }
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card card-info">
                 <div class="card-header card-header-lg bg-gradient-cyan">Actions</div>
 
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col">
-                            <a href="#" class="btn btn-block btn-outline-primary card-link">Card link</a>
-                        </div>
-                    </div>
-                    <div class="row pt-2">
-                        <div class="col">
-                            <a href="#" class="btn btn-block btn-outline-primary card-link">Another link</a>
-                        </div>
+                    <div class="row row-cols-1">
+                        @if( Model.Household.CreatorId == User.Identity.GetUserId() ) {
+                            <div class="col">
+                                @Html.Partial("~/Views/Households/_HouseholdEditButton.cshtml", Model.Household)
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
