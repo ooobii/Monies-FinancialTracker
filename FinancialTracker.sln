@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinancialTracker_Web", "FinancialTracker_Web\FinancialTracker_Web.csproj", "{05CF8C3A-8A55-4CD0-9447-B59E220252AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinancialTracker_Svc", "FinancialTracker_Svc\FinancialTracker_Svc.csproj", "{D5050BBF-3A02-48FA-B80D-39030E062DB3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{05CF8C3A-8A55-4CD0-9447-B59E220252AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05CF8C3A-8A55-4CD0-9447-B59E220252AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05CF8C3A-8A55-4CD0-9447-B59E220252AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5050BBF-3A02-48FA-B80D-39030E062DB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5050BBF-3A02-48FA-B80D-39030E062DB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5050BBF-3A02-48FA-B80D-39030E062DB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5050BBF-3A02-48FA-B80D-39030E062DB3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
