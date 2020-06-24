@@ -1,7 +1,7 @@
 ﻿-- =============================================
 -- Author:		Matthew Wendel
--- Create date: 6/19/2020 3:50PM
--- Update date: 6/24/2020 4:26PM
+-- Create date:	6/19/2020 3:50PM
+-- Update date:	6/24/2020 4:26PM
 -- Description:	Create new Household, and assign it to a user.
 -- =============================================
 CREATE OR ALTER PROCEDURE [dbo].[Household_Create]
@@ -30,8 +30,8 @@ GO
 
 -- =============================================
 -- Author:		Matthew Wendel
--- Create date: 6/19/2020 4:20PM
--- Update date: 6/24/2020 4:26PM
+-- Create date:	6/19/2020 4:20PM
+-- Update date:	6/24/2020 4:26PM
 -- Description:	Delete an existing household.
 -- =============================================
 CREATE OR ALTER PROCEDURE [dbo].[Household_Delete]
@@ -50,8 +50,8 @@ GO
 
 -- =============================================
 -- Author:		Matthew Wendel
--- Create date: 6/19/2020 4:06PM
--- Update date: 6/24/2020 4:26PM
+-- Create date:	6/19/2020 4:06PM
+-- Update date:	6/24/2020 4:26PM
 -- Description:	Modify details of an existing household.
 -- =============================================
 CREATE OR ALTER PROCEDURE [dbo].[Household_Edit]
