@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNet.Identity;
+﻿using System;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -9,7 +10,8 @@ using System.Threading.Tasks;
 namespace FinancialTracker_Web.Models
 {
     // You can add profile data for the user by adding more properties to your ApplicationUser class, please visit https://go.microsoft.com/fwlink/?LinkID=317594 to learn more.
-    public class ApplicationUser : IdentityUser {
+    public class ApplicationUser : IdentityUser
+    {
         [Required]
         [MinLength(2)]
         [MaxLength(20)]
@@ -75,6 +77,29 @@ namespace FinancialTracker_Web.Models
             var userIdentity = await manager.CreateIdentityAsync(this, DefaultAuthenticationTypes.ApplicationCookie);
             // Add custom user claims here
             return userIdentity;
+        }
+        public string GetGreeting() {
+            Random rnd = new Random();
+            int choice = rnd.Next(0, 5);
+            switch( choice ) {
+                case 0:
+                    return $"Hi, {this.GetShortName()}!";
+
+                case 1:
+                    return $"Welcome, {this.GetShortName()}!";
+
+                case 2:
+                    return $"Greetings {this.GetShortName()}!";
+
+                case 3:
+                    return $"G’day, {this.GetShortName()}!";
+
+                case 4:
+                    return $"Salutations, {this.GetShortName()}!";
+            }
+
+            return $"Hi, {this.GetShortName()}!";
+
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿@using FinancialTracker_Web.Models
+@using Microsoft.AspNet.Identity
 
 @{
     var usr = ApplicationUser.GetFromDb(User);
@@ -84,6 +85,33 @@
 
         <!-- Right navbar links -->
         <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
+            <!-- Manage Account / Logout -->
+            @if( usr != null ) {
+                <li class="nav-item dropdown">
+                    <a id="dropdownSubMenu3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">
+                        @usr.GetGreeting()
+                    </a>
+                    <ul aria-labelledby="dropdownSubMenu3" class="dropdown-menu border-0 shadow">
+                        @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new {
+                            id = "logoutForm"
+                        })) {
+                            @Html.AntiForgeryToken()
+                            <a href="javascript:document.getElementById('logoutForm').submit()">
+                                <li class="dropdown-item">
+                                    <i class="dropdown-icon fas fa-sign-out-alt"></i>
+                                    Log off
+                                </li>
+                            </a>
+                        }
+                        <li class="dropdown-divider"></li>
+                        <a href="@Url.Action("Index", "Manage")">
+                            <li class="dropdown-item">
+                                <i class="dropdown-icon fas fa-cogs"></i>Manage Account
+                            </li>
+                        </a>
+                    </ul>
+                </li>
+            }
             <!-- Messages Dropdown Menu -->
             <li class="nav-item dropdown">
                 <a class="nav-link" data-toggle="dropdown" href="#">
