@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Permissions;
+using System.Web;
 using WebGrease.Css;
 
 namespace FinancialTracker_Web.Models
@@ -69,16 +70,22 @@ namespace FinancialTracker_Web.Models
     {
         [Required]
         [StringLength(20, ErrorMessage = "Your first name must be at less than {1} characters long, but no longer than {2}.", MinimumLength = 2)]
+        [Display(Name = "First Name")]
         public string FirstName { get; set; }
 
         [Required]
         [StringLength(25, ErrorMessage = "Your last name must be at less than {1} characters long, but no longer than {2}.", MinimumLength = 1)]
+        [Display(Name = "Last Name")]
         public string LastName { get; set; }
 
         [Required]
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; }
+
+        [Display(Name = "Avatar")]
+        public HttpPostedFileBase AvatarFileBase { get; set; }
+
 
         [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]

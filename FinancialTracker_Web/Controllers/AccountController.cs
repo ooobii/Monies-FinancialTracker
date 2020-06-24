@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Configuration;
 using System.Web.Mvc;
+using FinancialTracker_Web.Helpers;
 
 namespace FinancialTracker_Web.Controllers
 {
@@ -147,8 +148,14 @@ namespace FinancialTracker_Web.Controllers
         public async Task<ActionResult> Register(RegisterViewModel model) {
             try {
                 if( ModelState.IsValid ) {
-                    var user = new ApplicationUser { UserName = model.Email, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName };
+                    var user = new ApplicationUser { 
+                        UserName = model.Email, Email = model.Email, 
+                        FirstName = model.FirstName, LastName = model.LastName,
+                        AvatarImagePath = AvatarHelper.ProcessUpload(Server, model.AvatarFileBase)
+                    };
+
                     var result = await UserManager.CreateAsync(user, model.Password);
+
                     if( result.Succeeded ) {
                         //this is commented out to prevent the user from being signed in until email is confirmed.
                         //await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
