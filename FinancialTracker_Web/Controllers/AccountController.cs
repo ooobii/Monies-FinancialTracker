@@ -162,7 +162,7 @@ namespace FinancialTracker_Web.Controllers
                             //fetch 'from' from configuration
                             var from = new System.Net.Mail.MailAddress(WebConfigurationManager.AppSettings[ "emailsvcusr" ], WebConfigurationManager.AppSettings[ "emailsvcdisplay" ]);
                             var emailMsg = new MailMessage(from.ToString(), user.Email) {
-                                Subject = $"Simplicita: Confirm your account, {user.GetFullName()}!",
+                                Subject = $"Monies: Confirm your account, {user.GetFullName()}!",
                                 Body = "<p>Thank you for registering! We're glad to have you.</p>" +
                                       $"<p>To activate your account, please <a href=\"{callbackUrl}\">click here</a>! After confirming your email, you will be able to login.</p>",
                                 IsBodyHtml = true
@@ -230,7 +230,7 @@ namespace FinancialTracker_Web.Controllers
                 try {
                     var from = new System.Net.Mail.MailAddress(WebConfigurationManager.AppSettings[ "emailsvcusr" ], WebConfigurationManager.AppSettings[ "emailsvcdisplay" ]);
                     var emailMsg = new MailMessage(from.ToString(), user.Email) {
-                        Subject = $"Simplicita: Confirm your account, {user.GetFullName()}!",
+                        Subject = $"Monies: Confirm your account, {user.GetFullName()}!",
                         Body = "<p>Here is a new copy of a confirmation email for your account.</p>" +
                                $"<p>Please <a href=\"{callbackUrl}\">click here</a>! After confirming your email, you will be able to login.</p>",
                         IsBodyHtml = true
