@@ -76,7 +76,7 @@
                         <li class="nav-item">
                             <a href="@Url.Action("Index", "Home")" class="nav-link">Home</a>
                         </li>
-                        @if( usr.HouseholdId != null ) {
+                        @if( usr != null && usr.HouseholdId != null ) {
                             <li class="nav-item dropdown">
                                 <a id="dropdownSubMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">@usr.Household.Name</a>
                                 <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow">

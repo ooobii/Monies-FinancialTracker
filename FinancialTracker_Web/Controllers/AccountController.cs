@@ -145,48 +145,52 @@ namespace FinancialTracker_Web.Controllers
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Register(RegisterViewModel model) {
-            if( ModelState.IsValid ) {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-                var result = await UserManager.CreateAsync(user, model.Password);
-                if( result.Succeeded ) {
-                    //this is commented out to prevent the user from being signed in until email is confirmed.
-                    //await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+            try {
+                if( ModelState.IsValid ) {
+                    var user = new ApplicationUser { UserName = model.Email, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName };
+                    var result = await UserManager.CreateAsync(user, model.Password);
+                    if( result.Succeeded ) {
+                        //this is commented out to prevent the user from being signed in until email is confirmed.
+                        //await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
 
-                    //create confirmation code and callback URL to trigger email confirmation.
-                    string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                    var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+                        //create confirmation code and callback URL to trigger email confirmation.
+                        string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+                        var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
 
-                    //begin attempt to send email
-                    try {
-                        //fetch 'from' from configuration
-                        var from = new System.Net.Mail.MailAddress(WebConfigurationManager.AppSettings[ "emailsvcusr" ], WebConfigurationManager.AppSettings[ "emailsvcdisplay" ]);
-                        var emailMsg = new MailMessage(from.ToString(), user.Email) {
-                            Subject = $"Simplicita: Confirm your account, {user.GetFullName()}!",
-                            Body = "<p>Thank you for registering! We're glad to have you.</p>" +
-                                  $"<p>To activate your account, please <a href=\"{callbackUrl}\">click here</a>! After confirming your email, you will be able to login.</p>",
-                            IsBodyHtml = true
-                        };
+                        //begin attempt to send email
+                        try {
+                            //fetch 'from' from configuration
+                            var from = new System.Net.Mail.MailAddress(WebConfigurationManager.AppSettings[ "emailsvcusr" ], WebConfigurationManager.AppSettings[ "emailsvcdisplay" ]);
+                            var emailMsg = new MailMessage(from.ToString(), user.Email) {
+                                Subject = $"Simplicita: Confirm your account, {user.GetFullName()}!",
+                                Body = "<p>Thank you for registering! We're glad to have you.</p>" +
+                                      $"<p>To activate your account, please <a href=\"{callbackUrl}\">click here</a>! After confirming your email, you will be able to login.</p>",
+                                IsBodyHtml = true
+                            };
 
-                        var emailSvc = new EmailService();
-                        await emailSvc.SendAsync(emailMsg);
+                            var emailSvc = new EmailService();
+                            await emailSvc.SendAsync(emailMsg);
 
-                        //redirect to confirmation sent, since login never occured (notify user of requirement to confirm).
-                        ViewBag.EmailSentTo = user.Email;
-                        return View("ConfirmationSent");
-                    } catch( Exception ex ) {
-                        //delete user since confirmation email failed to send.
-                        await UserManager.DeleteAsync(user);
+                            //redirect to confirmation sent, since login never occured (notify user of requirement to confirm).
+                            ViewBag.EmailSentTo = user.Email;
+                            return View("ConfirmationSent");
+                        } catch( Exception ex ) {
+                            //delete user since confirmation email failed to send.
+                            await UserManager.DeleteAsync(user);
 
-                        //print to IIS log
-                        Console.WriteLine(ex.ToString());
+                            //print to IIS log
+                            Console.WriteLine(ex.ToString());
 
-                        //add error to model state
-                        ModelState.AddModelError("Email Send Failure", "The account was not created. The confirmation email was unable to be sent, but is required for login. This erorr has been reported, please try again later.");
+                            //add error to model state
+                            ModelState.AddModelError("Email Send Failure", "The account was not created. The confirmation email was unable to be sent, but is required for login. This erorr has been reported, please try again later.");
+                        }
+
+                        return RedirectToAction("Index", "Home");
                     }
-
-                    return RedirectToAction("Index", "Home");
+                    AddErrors(result);
                 }
-                AddErrors(result);
+            } catch (Exception ex) {
+                Debugger.Break();
             }
 
             // If we got this far, something failed, redisplay form

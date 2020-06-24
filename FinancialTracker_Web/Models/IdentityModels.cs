@@ -12,11 +12,11 @@ namespace FinancialTracker_Web.Models
     public class ApplicationUser : IdentityUser {
         [Required]
         [MinLength(2)]
-        [MaxLength(25)]
+        [MaxLength(20)]
         public string FirstName { get; set; }
 
         [Required]
-        [MinLength(2)]
+        [MinLength(1)]
         [MaxLength(25)]
         public string LastName { get; set; }
 

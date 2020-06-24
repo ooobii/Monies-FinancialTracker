@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Permissions;
+using WebGrease.Css;
 
 namespace FinancialTracker_Web.Models
 {
@@ -65,6 +67,14 @@ namespace FinancialTracker_Web.Models
 
     public class RegisterViewModel
     {
+        [Required]
+        [StringLength(20, ErrorMessage = "Your first name must be at less than {1} characters long, but no longer than {2}.", MinimumLength = 2)]
+        public string FirstName { get; set; }
+
+        [Required]
+        [StringLength(25, ErrorMessage = "Your last name must be at less than {1} characters long, but no longer than {2}.", MinimumLength = 1)]
+        public string LastName { get; set; }
+
         [Required]
         [EmailAddress]
         [Display(Name = "Email")]

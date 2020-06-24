@@ -67,7 +67,7 @@
 
                 <div class="card-body">
                     <div class="row row-cols-1">
-                        @if( Model.Household.CreatorId == User.Identity.GetUserId() ) {
+                        @if( Model.Household != null && Model.Household.CreatorId == User.Identity.GetUserId() ) {
                             <div class="col">
                                 @Html.Partial("~/Views/Households/_HouseholdEditButton.cshtml", Model.Household)
                             </div>
