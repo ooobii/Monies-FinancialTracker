@@ -33,7 +33,7 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 	
-	IF EXISTS (SELECT [Id] FROM [BankAccountTypes] WHERE [Id] = @Id) THROW 51000, 'The ID provided did not locate a bank account type.', 1;
+	IF NOT EXISTS (SELECT [Id] FROM [BankAccountTypes] WHERE [Id] = @Id) THROW 51000, 'The ID provided did not locate a bank account type.', 1;
 	
 	DELETE FROM [BankAccountTypes] WHERE [Id] = @Id;
 	
