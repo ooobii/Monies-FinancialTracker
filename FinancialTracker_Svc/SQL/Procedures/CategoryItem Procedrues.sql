@@ -1,8 +1,8 @@
 ﻿-- =============================================
 -- Author:		Matthew Wendel
 -- Create date:	6/24/2020 4:32PM
--- Update date:	6/25/2020 11:24AM
--- Description:	Create a new category for the household the user is assigned to.
+-- Update date:	6/25/2020 12:24PM
+-- Description:	Create a new category item for the selected parent category.
 -- =============================================
 CREATE OR ALTER PROCEDURE [dbo].[CategoryItem_Create]
 	@CreatorId nvarchar(max),
@@ -45,10 +45,11 @@ END
 GO
 
 
+
 -- =============================================
 -- Author:		Matthew Wendel
 -- Create date: 6/25/2020 4:20PM
--- Update date: 6/25/2020 12:00PM
+-- Update date: 6/25/2020 12:24PM
 -- Description:	Delete an existing subcategory.
 -- =============================================
 CREATE OR ALTER PROCEDURE [dbo].[CategoryItem_Delete]
@@ -81,7 +82,7 @@ GO
 -- =============================================
 -- Author:		Matthew Wendel
 -- Create date:	6/25/2020 10:50AM
--- Update date:	6/25/2020 12:10pM
+-- Update date:	6/25/2020 12:24PM
 -- Description:	Edit an existing category item that belongs to a household the user is a member of.
 -- =============================================
 CREATE OR ALTER PROCEDURE [dbo].[CategoryItem_Edit]
@@ -103,6 +104,9 @@ BEGIN
 
 	IF NOT EXISTS (SELECT [Id] FROM [CategoryItems] WHERE [Id] = @Id) 
 		THROW 51000, 'The ID provided did not locate a sub category.', 1; 
+		
+	IF @NewParentCategoryId IS NOT NULL AND NOT EXISTS (SELECT [Id] FROM [Categories] WHERE [Id] = @NewParentCategoryId) 
+		THROW 51000, 'The new parent category ID provided does not exist.', 1; 
 	
 
 	DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId);
