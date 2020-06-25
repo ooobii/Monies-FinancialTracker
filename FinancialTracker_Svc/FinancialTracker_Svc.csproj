@@ -204,6 +204,7 @@
     <Content Include="SQL\Procedures\Category Procedures.sql" />
     <Content Include="SQL\Procedures\CategoryItem Procedrues.sql" />
     <Content Include="SQL\Procedures\Household Procedures.sql" />
+    <Content Include="SQL\Procedures\Transaction Procedures.sql" />
     <Content Include="SQL\Procedures\TransactionType Procedures.sql" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
