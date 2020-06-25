@@ -37,8 +37,8 @@ namespace FinancialTracker_Svc.Controllers
 
         [Route("Household/{id}/delete")]
         [HttpDelete]
-        public async Task<ResultSet> Household_Delete(string secret, int HouseholdId) {
-            return await db.DeleteHousehold(HouseholdId);
+        public async Task<ResultSet> Household_Delete(string Secret, int HouseholdId) {
+            return await db.DeleteHousehold(Secret, HouseholdId);
         }
 
     }
