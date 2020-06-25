@@ -175,6 +175,15 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\ApiDbContext.cs" />
+    <Compile Include="Models\BankAccount.cs" />
+    <Compile Include="Models\BankAccountType.cs" />
+    <Compile Include="Models\Category.cs" />
+    <Compile Include="Models\CategoryItem.cs" />
+    <Compile Include="Models\Household.cs" />
+    <Compile Include="Models\Invitation.cs" />
+    <Compile Include="Models\Notification.cs" />
+    <Compile Include="Models\Transaction.cs" />
+    <Compile Include="Models\TransactionType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="SQL\Procedures\BankAccountType Procedures.sql" />
   </ItemGroup>
