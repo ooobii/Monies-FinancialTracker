@@ -30,6 +30,7 @@ namespace FinancialTracker_Web.Models
 
         public ICollection<BankAccount> Accounts { get; set; }
 
+        public string ApiSecret { get; set; }
 
         public string GetShortName() {
             return this.LastName.Length > 0 ? $"{this.FirstName} {this.LastName.Substring(0, 1)}" : $"{this.FirstName}";

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace FinancialTracker_Svc.Models
 {
@@ -9,5 +10,14 @@ namespace FinancialTracker_Svc.Models
         public string Greeting { get; set; }
         public DateTime CreatedAt { get; set; }
         public string CreatorId { get; set; }
+    }
+
+    public class HouseholdsContainer
+    {
+        public List<Household> Households { get; set; }
+
+        public HouseholdsContainer(List<Household> homes) {
+            Households = homes;
+        }
     }
 }
