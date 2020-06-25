@@ -26,7 +26,7 @@ BEGIN
 	VALUES(@CreatorId, @houseId, @Type, @Name, @now, null, @StartingBalance, @LowBalanceAlert)
 
 
-	return 0;
+	RETURN @@ROWCOUNT;
 END
 GO
 -- =============================================
@@ -48,9 +48,10 @@ BEGIN
 	DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId);
 	IF (CASE WHEN (SELECT [ParentHouseholdId] FROM [BankAccounts] WHERE [Id] = @Id) != @houseId THEN 1 ELSE 0 END) = 1 THROW 51000, 'The user removing this account does not belong to the parent household.', 1; 
 	
+	SET NOCOUNT OFF;
 	DELETE FROM [BankAccounts] WHERE [Id] = @Id;
 	
-	return 0;
+	return @@ROWCOUNT;
 END
 GO
 -- =============================================
@@ -88,6 +89,7 @@ IF NOT EXISTS (SELECT [Id] FROM [BankAccounts] WHERE [Id] = @Id) THROW 51000, 'T
 	WHERE [Id] = @Id	
 
   
+	SET NOCOUNT OFF;
 	IF DATALENGTH(@NewName) !=0 AND @NewName != @oldName 
 	UPDATE [BankAccounts] SET [AccountName] = @NewName WHERE [Id] = @Id;
 
@@ -99,7 +101,7 @@ IF NOT EXISTS (SELECT [Id] FROM [BankAccounts] WHERE [Id] = @Id) THROW 51000, 'T
 
 
 
-	return 0;
+	return @@ROWCOUNT;
 END
 GO
 -- =============================================
@@ -115,8 +117,11 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 	IF NOT EXISTS (SELECT [Id] FROM [BankAccounts] WHERE [Id] = @Id) THROW 51000, 'The Bank Account Id provided returned no records', 1;
+	IF NOT EXISTS (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret) THROW 51000, 'Bad API Secret.', 1;
+	DECLARE @CallerId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
+	IF NOT (SELECT [ParentHouseholdId] FROM [BankAccounts] WHERE [Id] = @Id) != (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId) THROW 51000, 'You must be a member of the household to view this account.', 1;
 
-	RETURN SELECT [Id]
+	SELECT [Id]
 				 ,[OwnerId]
 				 ,[ParentHouseholdId]
 				 ,[AccountTypeId]
@@ -148,7 +153,7 @@ BEGIN
 	INSERT INTO [BankAccountTypes]
 	VALUES(@Name);
 
-	return 0;
+	RETURN @@ROWCOUNT;
 END
 GO
 -- =============================================
@@ -167,7 +172,7 @@ BEGIN
 	
 	DELETE FROM [BankAccountTypes] WHERE [Id] = @Id;
 	
-	return 0;
+	RETURN @@ROWCOUNT;
 END
 GO
 
@@ -196,7 +201,7 @@ BEGIN
 	UPDATE [BankAccountTypes] SET [Name] = @NewName WHERE [Id] = @Id;
 
 
-	return 0;
+	RETURN @@ROWCOUNT;
 END
 GO
 -- =============================================
@@ -206,8 +211,7 @@ GO
 -- Description:	Fetch details of an bank account type.
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[BankAccountType_Fetch]
-	@Id int,
-	@Secret nvarchar(max)
+	@Id int
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -250,11 +254,12 @@ BEGIN
 	DECLARE @now datetime = GETDATE();
 	DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CreatorId);
 	
+	SET NOCOUNT OFF;
 	INSERT INTO [Categories]
 	VALUES(@houseId, @Name, @Description, @now)
 
 
-	return 0;
+	return @@ROWCOUNT;
 END
 GO
 -- =============================================
@@ -276,9 +281,10 @@ IF NOT EXISTS (SELECT [Id] FROM [Categories] WHERE [Id] = @Id) THROW 51000, 'The
 	DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId);
 	IF (CASE WHEN (SELECT [ParentHouseholdId] FROM [Categories] WHERE [Id] = @Id) != @houseId THEN 1 ELSE 0 END) = 1 THROW 51000, 'The user removing this category does not belong to the parent household.', 1; 
 	
+	SET NOCOUNT OFF;
 	DELETE FROM [Categories] WHERE [Id] = @Id;
 	
-	return 0;
+	return @@ROWCOUNT;
 END
 GO
 -- =============================================
@@ -312,7 +318,7 @@ BEGIN
 	FROM [Categories]
 	WHERE [Id] = @Id	
 
-  
+    SET NOCOUNT OFF;
 	IF DATALENGTH(@NewName) !=0 AND @NewName != @oldName 
 	UPDATE [Categories] SET [Name] = @NewName WHERE [Id] = @Id;
 
@@ -320,7 +326,7 @@ BEGIN
 	UPDATE [Categories] SET [Description] = @NewDescription WHERE [Id] = @Id;
 
 
-	return 0;
+	return @@ROWCOUNT;
 END
 GO
 
@@ -363,13 +369,13 @@ BEGIN
 		THROW 51000, 'The parent category does not belong to the household of the creator.', 1; 
 
 
-
+	SET NOCOUNT OFF;
 	INSERT INTO [CategoryItems]
 	VALUES(@ParentCategoryId, @Name, @Description, @Budget)
 
 
 
-	return 0;
+	return @@ROWCOUNT;
 END
 GO
 -- =============================================
@@ -397,10 +403,10 @@ BEGIN
 	IF @houseId != @categoryHouseId 
 		THROW 51000, 'The parent category does not belong to the household of the creator.', 1; 
 
-
+	SET NOCOUNT OFF;
 	DELETE FROM [CategoryItems] WHERE [Id] = @Id;
 	
-	return 0;
+	return @@ROWCOUNT;
 END
 GO
 -- =============================================
@@ -461,6 +467,7 @@ BEGIN
 	WHERE [Id] = @Id	
 
   
+	SET NOCOUNT OFF;
 	IF DATALENGTH(@NewName) !=0 AND @NewName != @oldName 
 	UPDATE [CategoryItems] SET [Name] = @NewName WHERE [Id] = @Id;
 
@@ -474,7 +481,7 @@ BEGIN
 	UPDATE [CategoryItems] SET [ParentCategoryId] = @NewParentCategoryId WHERE [Id] = @Id;
 
 
-	return 0;
+	RETURN @@ROWCOUNT;
 END
 GO
 
@@ -500,13 +507,15 @@ DECLARE @now datetime = GETDATE();
 
 	INSERT INTO [Households]
 	VALUES(@Name, @Greeting, @now, @CreatorId)
-
+	
+	SET NOCOUNT OFF;
 	UPDATE [AspNetUsers]
 	SET [HouseholdId] = (SELECT [Id] FROM [Households] WHERE [Name] = @Name AND
 															 [Greeting] = @Greeting AND
 															 [CreatedAt] = @now AND
 															 [CreatorId] = @CreatorId);
 
+	RETURN @@ROWCOUNT
 END
 GO
 -- =============================================
@@ -526,9 +535,10 @@ BEGIN
 	IF NOT EXISTS (SELECT [Id] FROM [Households] WHERE [Id] = @Id) THROW 51000, 'The Household Id provided returned no records', 1;
 	IF ((CASE WHEN (SELECT [CreatorId] FROM [Households] WHERE [Id] = @Id) != @CallerId THEN 1 ELSE 0 END) = 1)  THROW 51000, 'The user calling this action is not the owner, and cannot delete the household.', 1;
 
+	SET NOCOUNT OFF;
 	DELETE FROM [Households] WHERE [Id] = @Id;
 	
-	return 0;
+	return @@ROWCOUNT;
 END
 GO
 -- =============================================
@@ -544,6 +554,7 @@ CREATE OR ALTER  PROCEDURE [dbo].[Household_Edit]
 	@newGreeting nvarchar(255) = NULL
 AS
 BEGIN
+	SET NOCOUNT ON;
 	IF NOT EXISTS (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret) THROW 51000, 'Bad API secret.', 1;
 	DECLARE @CallerId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
 	IF NOT EXISTS (SELECT [Id] FROM [Households] WHERE [Id] = @Id) THROW 51000, 'The Household Id provided returned no records', 1;
@@ -554,6 +565,7 @@ BEGIN
 	DECLARE @oldGreeting nvarchar(25);
 	SELECT @oldName = [Name], @oldGreeting = [Greeting] FROM [Households] WHERE [Id] = @Id;
   
+	SET NOCOUNT OFF;
 	IF DATALENGTH(@newName) !=0 AND @newName != @oldName 
 	UPDATE [Households] SET [Name] = @newName WHERE [Id] = @Id;
 
@@ -647,13 +659,13 @@ BEGIN
 		THROW 51000, 'The assigned bank account does not belong to the household of the creator.', 1; 
 
 
-
+	SET NOCOUNT OFF;
 	INSERT INTO [Transactions]
 	VALUES(@ParentAccountId, @TransactionTypeId, @CategoryItemId, @CreatorId, @Name, @Memo, @Amount, @OccuredAt, @now)
 
 
 
-	return 0;
+	RETURN @@ROWCOUNT;
 END
 GO
 -- =============================================
@@ -697,10 +709,11 @@ BEGIN
 		THROW 51000, 'Only the owner of the household, bank account, or the transaction may delete transaction records.', 1;	 	
 		
 
-
+		
+	SET NOCOUNT OFF;
 	DELETE FROM [Transactions] WHERE [Id] = @Id;
 	
-	return 0;
+	RETURN @@ROWCOUNT;
 END
 GO
 -- =============================================
@@ -768,6 +781,7 @@ BEGIN
 	WHERE [Id] = @Id	
 
   
+	SET NOCOUNT OFF;
 	IF DATALENGTH(@NewName) !=0 AND @NewName != @oldName 
 	UPDATE [Transactions] SET [Name] = @NewName WHERE [Id] = @Id;
 
@@ -790,7 +804,7 @@ BEGIN
 	UPDATE [Transactions] SET [CategoryItemId] = @NewCategoryItemId WHERE [Id] = @Id;
 
 
-	return 0;
+	RETURN @@ROWCOUNT;
 END
 GO
 -- =============================================
@@ -808,11 +822,12 @@ BEGIN
 	SET NOCOUNT ON;
 	
 	IF EXISTS (SELECT [Name] FROM [TransactionTypes] WHERE [Name] = @Name)  THROW 51000, 'A transaction type with this name already exists.', 1; 
-
+	
+	SET NOCOUNT OFF;
 	INSERT INTO [TransactionTypes]
 	VALUES(@Name, @Description, @IsIncome);
 
-	return 0;
+	RETURN @@ROWCOUNT;
 END
 GO
 -- =============================================
@@ -829,9 +844,10 @@ BEGIN
 	
 	IF NOT EXISTS (SELECT [Id] FROM [TransactionTypes] WHERE [Id] = @Id) THROW 51000, 'The ID provided did not locate a transaction type.', 1;
 	
+	SET NOCOUNT OFF;
 	DELETE FROM [TransactionTypes] WHERE [Id] = @Id;
 	
-	return 0;
+	RETURN @@ROWCOUNT;
 END
 GO
 -- =============================================
@@ -861,7 +877,8 @@ BEGIN
 		  ,@isIncome = [IsIncome]
 	FROM [TransactionTypes] WHERE [Id] = @Id
 
-
+	
+	SET NOCOUNT OFF;
 	IF DATALENGTH(@NewName) != 0 AND @NewName != @oldName
 	UPDATE [TransactionTypes] SET [Name] = @NewName WHERE [Id] = @Id;
 
@@ -872,6 +889,6 @@ BEGIN
 	UPDATE [TransactionTypes] SET [IsIncome] = @IsStillIncome WHERE [Id] = @Id;
 
 
-	return 0;
+	RETURN @@ROWCOUNT;
 END
 GO
