@@ -55,7 +55,7 @@ namespace FinancialTracker_Svc.Models
 
         #endregion
 
-
+        //Household Methods
         public async Task<HouseholdsContainer> GetHouseholds() {
             return new HouseholdsContainer(await Database.SqlQuery<Household>("exec Household_Fetch").ToListAsync());
         }
@@ -145,6 +145,92 @@ namespace FinancialTracker_Svc.Models
             }
         }
 
+
+        
+        //BankAccountTypeMethods
+        public async Task<BankAccountTypesContainer> GetBankAccountTypes() {
+            return new BankAccountTypesContainer(await Database.SqlQuery<BankAccountType>("exec BankAccountType_Fetch").ToListAsync());
+        }
+        public async Task<BankAccountType> GetBankAccountType(int id) {
+            try {
+                return await Database.SqlQuery<BankAccountType>("exec BankAccountType_Fetch @id",
+                new SqlParameter("@id", id)).FirstOrDefaultAsync();
+            } catch( SqlException sqlex ) {
+                throw _errDatabaseMsg(sqlex);
+
+            } catch( HttpResponseException hme ) {
+                throw;
+
+            } catch( Exception ex ) {
+                throw _errGeneralException(ex);
+            }
+
+        }
+        public async Task<BankAccountType> CreateBankAccountType(string name) {
+            try {
+                var batId = await Database.SqlQuery<int>("exec BankAccountType_Create @Name",
+                                                                 new SqlParameter("@Name", name ?? "")).FirstOrDefaultAsync();
+                if( batId < 1 ) {
+                    throw _errNoChange();
+                }
+                return await GetBankAccountType(batId);
+
+            } catch( SqlException sqlex ) {
+                throw _errDatabaseMsg(sqlex);
+
+            } catch( HttpResponseException hme ) {
+                throw;
+
+            } catch( Exception ex ) {
+                throw _errGeneralException(ex);
+            }
+        }
+        public async Task<BankAccountType> EditBankAccountType(int id, string newName = null) {
+            try {
+                var rows = await Database.ExecuteSqlCommandAsync("exec BankAccountType_Edit @Id, @NewName",
+                                                                    new SqlParameter("@Id", id),
+                                                                    new SqlParameter("@NewName", newName ?? ""));
+                if( rows < 1 ) {
+                    throw _errNoChange();
+                }
+
+                return await GetBankAccountType(id);
+
+            } catch( SqlException sqlex ) {
+                throw _errDatabaseMsg(sqlex);
+
+            } catch( HttpResponseException hme ) {
+                throw;
+
+            } catch( Exception ex ) {
+                throw _errGeneralException(ex);
+            }
+        }
+        public async Task<ResultSet> DeleteBankAccountType(int id) {
+            Database.BeginTransaction();
+            try {
+                var rows = await Database.ExecuteSqlCommandAsync("exec BankAccountType_Delete @Id",
+                                                                 new SqlParameter("@Id", id));
+                if( rows < 1 ) {
+                    Database.CurrentTransaction?.Rollback();
+                    throw _errNoChange();
+                }
+
+
+                Database.CurrentTransaction.Commit();
+                return new ResultSet(false, 0, "BankAccountType Deleted Successfully.", id);
+
+            } catch( SqlException sqlex ) {
+                Database.CurrentTransaction?.Rollback();
+                throw _errDatabaseMsg(sqlex);
+
+            } catch( HttpResponseException hme ) {
+                throw;
+
+            } catch( Exception ex ) {
+                throw _errGeneralException(ex);
+            }
+        }
 
 
 
