@@ -639,6 +639,7 @@ END
 GO
 
 
+
 -- =============================================
 -- Author:		Matthew Wendel
 -- Create date:	6/24/2020 4:32PM
@@ -834,6 +835,9 @@ BEGIN
 	RETURN @@ROWCOUNT;
 END
 GO
+
+
+
 -- =============================================
 -- Author:		Matthew Wendel
 -- Create date:	6/24/2020 4:32PM
@@ -870,6 +874,7 @@ BEGIN
 	SET NOCOUNT ON;
 	
 	IF NOT EXISTS (SELECT [Id] FROM [TransactionTypes] WHERE [Id] = @Id) THROW 51000, 'The ID provided did not locate a transaction type.', 1;
+	IF EXISTS (SELECT TOP(1) [Id] FROM [Transactions] WHERE [TransactionTypeId] = @Id) THROW 51000, 'This transaction type is still in use, and cannot be deleted.', 1;
 	
 	SET NOCOUNT OFF;
 	DELETE FROM [TransactionTypes] WHERE [Id] = @Id;
@@ -885,9 +890,9 @@ GO
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[TransactionType_Edit]
 	@Id int,
-	@NewName nvarchar(max),
-	@NewDescription nvarchar(125),
-	@IsStillIncome bit
+	@NewName nvarchar(max) = NULL,
+	@NewDescription nvarchar(125) = NULL,
+	@IsStillIncome bit = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -917,5 +922,31 @@ BEGIN
 
 
 	RETURN @@ROWCOUNT;
+END
+GO
+-- =============================================
+-- Author:		Matthew Wendel
+-- Create date: 6/25/2020 10:28PM
+-- Update date: 6/25/2020 10:29PM
+-- Description:	Fetch details of an bank account type.
+-- =============================================
+CREATE OR ALTER  PROCEDURE [dbo].[TransactionType_Fetch]
+	@Id int = null
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	IF @Id IS NULL BEGIN
+
+		SELECT [Id], [Name], [Description], [IsIncome] FROM [TransactionTypes]
+
+	END
+
+	IF @Id IS NOT NULL BEGIN
+		IF NOT EXISTS (SELECT [Id] FROM [TransactionTypes] WHERE [Id] = @Id) THROW 51000, 'The Transaction Type Id provided returned no records', 1;
+		
+		SELECT [Id], [Name], [Description], [IsIncome] FROM [TransactionTypes] WHERE [Id] = @Id
+
+	END
 END
 GO

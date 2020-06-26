@@ -66,9 +66,6 @@ namespace FinancialTracker_Svc.Models
             } catch( SqlException sqlex ) {
                 throw _errDatabaseMsg(sqlex);
 
-            } catch( HttpResponseException hme ) {
-                throw;
-
             } catch( Exception ex ) {
                 throw _errGeneralException(ex);
             }
@@ -88,7 +85,7 @@ namespace FinancialTracker_Svc.Models
             } catch( SqlException sqlex ) {
                 throw _errDatabaseMsg(sqlex);
 
-            } catch( HttpResponseException hme ) {
+            } catch( HttpResponseException ) {
                 throw;
 
             } catch( Exception ex ) {
@@ -111,7 +108,7 @@ namespace FinancialTracker_Svc.Models
             } catch( SqlException sqlex ) {
                 throw _errDatabaseMsg(sqlex);
 
-            } catch( HttpResponseException hme ) {
+            } catch( HttpResponseException ) {
                 throw;
 
             } catch( Exception ex ) {
@@ -137,7 +134,7 @@ namespace FinancialTracker_Svc.Models
                 Database.CurrentTransaction?.Rollback();
                 throw _errDatabaseMsg(sqlex);
 
-            } catch( HttpResponseException hme ) {
+            } catch( HttpResponseException ) {
                 throw;
 
             } catch( Exception ex ) {
@@ -146,7 +143,6 @@ namespace FinancialTracker_Svc.Models
         }
 
 
-        
         //BankAccountTypeMethods
         public async Task<BankAccountTypesContainer> GetBankAccountTypes() {
             return new BankAccountTypesContainer(await Database.SqlQuery<BankAccountType>("exec BankAccountType_Fetch").ToListAsync());
@@ -158,7 +154,7 @@ namespace FinancialTracker_Svc.Models
             } catch( SqlException sqlex ) {
                 throw _errDatabaseMsg(sqlex);
 
-            } catch( HttpResponseException hme ) {
+            } catch( HttpResponseException ) {
                 throw;
 
             } catch( Exception ex ) {
@@ -178,7 +174,7 @@ namespace FinancialTracker_Svc.Models
             } catch( SqlException sqlex ) {
                 throw _errDatabaseMsg(sqlex);
 
-            } catch( HttpResponseException hme ) {
+            } catch( HttpResponseException ) {
                 throw;
 
             } catch( Exception ex ) {
@@ -199,7 +195,7 @@ namespace FinancialTracker_Svc.Models
             } catch( SqlException sqlex ) {
                 throw _errDatabaseMsg(sqlex);
 
-            } catch( HttpResponseException hme ) {
+            } catch( HttpResponseException ) {
                 throw;
 
             } catch( Exception ex ) {
@@ -224,7 +220,7 @@ namespace FinancialTracker_Svc.Models
                 Database.CurrentTransaction?.Rollback();
                 throw _errDatabaseMsg(sqlex);
 
-            } catch( HttpResponseException hme ) {
+            } catch( HttpResponseException ) {
                 throw;
 
             } catch( Exception ex ) {
@@ -233,15 +229,91 @@ namespace FinancialTracker_Svc.Models
         }
 
 
+        //TransactionTypeMethods
+        public async Task<TransactionTypesContainer> GetTransactionTypes() {
+            return new TransactionTypesContainer(await Database.SqlQuery<TransactionType>("exec TransactionType_Fetch").ToListAsync());
+        }
+        public async Task<TransactionType> GetTransactionType(int id) {
+            try {
+                return await Database.SqlQuery<TransactionType>("exec TransactionType_Fetch @id",
+                new SqlParameter("@id", id)).FirstOrDefaultAsync();
+            } catch( SqlException sqlex ) {
+                throw _errDatabaseMsg(sqlex);
 
-        public System.Data.Entity.DbSet<BankAccount> BankAccounts { get; set; }
-        public System.Data.Entity.DbSet<BankAccountType> BankAccountTypes { get; set; }
-        public System.Data.Entity.DbSet<Household> Households { get; set; }
-        public System.Data.Entity.DbSet<Category> Categories { get; set; }
-        public System.Data.Entity.DbSet<CategoryItem> CategoryItems { get; set; }
-        public System.Data.Entity.DbSet<TransactionType> TransactionTypes { get; set; }
-        public System.Data.Entity.DbSet<Transaction> Transactions { get; set; }
-        public System.Data.Entity.DbSet<Invitation> Invitations { get; set; }
+            } catch( Exception ex ) {
+                throw _errGeneralException(ex);
+            }
+
+        }
+        public async Task<TransactionType> CreateTransactionType(string name, string description, bool isincome) {
+            try {
+                var ttId = await Database.SqlQuery<int>("exec TransactionType_Create @Name, @Description, @IsIncome",
+                                                                 new SqlParameter("@Name", name ?? ""),
+                                                                 new SqlParameter("@Description", description),
+                                                                 new SqlParameter("@IsIncome", isincome)).FirstOrDefaultAsync();
+                if( ttId < 1 ) {
+                    throw _errNoChange();
+                }
+                return await GetTransactionType(ttId);
+
+            } catch( SqlException sqlex ) {
+                throw _errDatabaseMsg(sqlex);
+
+            } catch( HttpResponseException ) {
+                throw;
+
+            } catch( Exception ex ) {
+                throw _errGeneralException(ex);
+            }
+        }
+        public async Task<TransactionType> EditTransactionType(int id, string newName = null, string newDescription = null, bool? isStillIncome = null) {
+            try {
+                var rows = await Database.ExecuteSqlCommandAsync("exec TransactionType_Edit @Id, @NewName, @NewDescription, @IsStillIncome",
+                                                                    new SqlParameter("@Id", id),
+                                                                    new SqlParameter("@NewName", newName ?? ""),
+                                                                    new SqlParameter("@Description", newDescription),
+                                                                    new SqlParameter("@IsIncome", isStillIncome));
+                if( rows < 1 ) {
+                    throw _errNoChange();
+                }
+
+                return await GetTransactionType(id);
+
+            } catch( SqlException sqlex ) {
+                throw _errDatabaseMsg(sqlex);
+
+            } catch( HttpResponseException ) {
+                throw;
+
+            } catch( Exception ex ) {
+                throw _errGeneralException(ex);
+            }
+        }
+        public async Task<ResultSet> DeleteTransactionType(int id) {
+            Database.BeginTransaction();
+            try {
+                var rows = await Database.ExecuteSqlCommandAsync("exec TransactionType_Delete @Id",
+                                                                 new SqlParameter("@Id", id));
+                if( rows < 1 ) {
+                    Database.CurrentTransaction?.Rollback();
+                    throw _errNoChange();
+                }
+
+
+                Database.CurrentTransaction.Commit();
+                return new ResultSet(false, 0, "Transaction Type Deleted Successfully.", id);
+
+            } catch( SqlException sqlex ) {
+                Database.CurrentTransaction?.Rollback();
+                throw _errDatabaseMsg(sqlex);
+
+            } catch( HttpResponseException ) {
+                throw;
+
+            } catch( Exception ex ) {
+                throw _errGeneralException(ex);
+            }
+        }
 
     }
 }
