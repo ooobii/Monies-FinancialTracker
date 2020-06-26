@@ -9,24 +9,25 @@ CREATE OR ALTER  PROCEDURE [dbo].[BankAccount_Create]
 	@Name nvarchar(max),
 	@Type int,
 	@StartingBalance decimal(18, 2),
-	@LowBalanceAlert decimal(18, 2)
+	@LowBalanceAlert decimal(18, 2) = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
 		
 	IF NOT EXISTS (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret) THROW 51000, 'Bad API secret', 1;
 	DECLARE @CreatorId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
-
-	IF (CASE WHEN (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CreatorId) IS NULL THEN 1 ELSE 0 END) = 1 THROW 51000, 'The user creating this account does not belong to a household.', 1;  
+	IF (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CreatorId) IS NULL THROW 51000, 'The user creating this account does not belong to a household.', 1;  
+	IF NOT EXISTS (SELECT [Id] FROM [BankAccountTypes] WHERE [Id] = @Type)  THROW 51000, 'The new account type ID did not locate a bank account type.', 1; 
 
 	DECLARE @now datetime = GETDATE();
 	DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CreatorId);
 	
 	INSERT INTO [BankAccounts]
-	VALUES(@CreatorId, @houseId, @Type, @Name, @now, null, @StartingBalance, @LowBalanceAlert)
+	VALUES(@CreatorId, @houseId, @Type, @Name, @now, null, @StartingBalance, @LowBalanceAlert);
 
 
-	RETURN @@ROWCOUNT;
+
+	SELECT [Id] FROM [BankAccounts] WHERE [CreatedAt] = @now AND [OwnerId] = @CreatorId;
 END
 GO
 -- =============================================
@@ -36,8 +37,8 @@ GO
 -- Description:	Delete an existing bank account.
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[BankAccount_Delete]
-	@Id int,
-	@Secret nvarchar(max)
+	@Secret nvarchar(max),
+	@Id int
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -48,6 +49,12 @@ BEGIN
 	DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId);
 	IF (CASE WHEN (SELECT [ParentHouseholdId] FROM [BankAccounts] WHERE [Id] = @Id) != @houseId THEN 1 ELSE 0 END) = 1 THROW 51000, 'The user removing this account does not belong to the parent household.', 1; 
 	
+	IF NOT ((SELECT h.[CreatorId] FROM [BankAccounts] ba 
+	         LEFT JOIN [Households] h ON ba.[ParentHouseholdId] = h.[Id] 
+			 WHERE [ba].[Id] = @Id) = @CallerId) OR 
+	   NOT ((SELECT [OwnerId] FROM [BankAccounts] WHERE [Id] = @Id) = @CallerId)  THROW 51000, 'The user calling this action is not the owner or household owner, and cannot delete this bank account.', 1;
+
+
 	SET NOCOUNT OFF;
 	DELETE FROM [BankAccounts] WHERE [Id] = @Id;
 	
@@ -61,18 +68,19 @@ GO
 -- Description:	Edit an existing account that belongs to a household the user is a member of.
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[BankAccount_Edit]
-	@Id int,
 	@Secret nvarchar(max),
-	@NewName nvarchar(max),
-	@NewType int,
-	@NewLowBalanceAlert decimal(18, 2)
+	@Id int,
+	@NewName nvarchar(max) = NULL,
+	@NewType int = NULL,
+	@NewLowBalanceAlert decimal(18, 2) = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
 	
 	IF NOT EXISTS (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret) THROW 51000, 'Bad API secret.', 1;
-	DECLARE @CallerId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
-IF NOT EXISTS (SELECT [Id] FROM [BankAccounts] WHERE [Id] = @Id) THROW 51000, 'The ID provided did not locate a bank account.', 1;  
+	IF NOT EXISTS (SELECT [Id] FROM [BankAccounts] WHERE [Id] = @Id) THROW 51000, 'The ID provided did not locate a bank account.', 1; 
+	IF NOT EXISTS (SELECT [Id] FROM [BankAccountTypes] WHERE [Id] = @NewType)  THROW 51000, 'The new account type ID did not locate a bank account type.', 1; 
+	DECLARE @CallerId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret); 
 	
 	DECLARE @now datetime = GETDATE();
 	DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId);
@@ -91,13 +99,13 @@ IF NOT EXISTS (SELECT [Id] FROM [BankAccounts] WHERE [Id] = @Id) THROW 51000, 'T
   
 	SET NOCOUNT OFF;
 	IF DATALENGTH(@NewName) !=0 AND @NewName != @oldName 
-	UPDATE [BankAccounts] SET [AccountName] = @NewName WHERE [Id] = @Id;
+	UPDATE [BankAccounts] SET [AccountName] = @NewName, [ModifiedAt] = @now WHERE [Id] = @Id;
 
 	IF @NewType IS NOT NULL AND @NewType != @oldType 
-	UPDATE [BankAccounts] SET [AccountTypeId] = @NewType WHERE [Id] = @Id;
+	UPDATE [BankAccounts] SET [AccountTypeId] = @NewType, [ModifiedAt] = @now WHERE [Id] = @Id;
 
 	IF @NewLowBalanceAlert IS NOT NULL AND @NewLowBalanceAlert != @oldLowBalAlert 
-	UPDATE [BankAccounts] SET [LowBalanceAlertThreshold] = @NewLowBalanceAlert WHERE [Id] = @Id;
+	UPDATE [BankAccounts] SET [LowBalanceAlertThreshold] = @NewLowBalanceAlert, [ModifiedAt] = @now WHERE [Id] = @Id;
 
 
 
@@ -111,18 +119,17 @@ GO
 -- Description:	Fetch details of an bank account.
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[BankAccount_Fetch]
-	@Id int = null,
-	@Secret nvarchar(max)
+	@Secret nvarchar(max),
+	@Id int = null
 AS
 BEGIN
 	SET NOCOUNT ON;
 	IF NOT EXISTS (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret) THROW 51000, 'Bad API Secret.', 1;
 	DECLARE @CallerId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
+	DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId);
+	IF @houseId IS NULL  THROW 51000, 'You must be a member of a household to view accounts.', 1;
 
 	IF @Id IS NULL BEGIN
-		DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId);
-		IF @houseId IS NULL  THROW 51000, 'You must be a member of a household to view accounts.', 1;
-
 		SELECT [Id]
 				,[OwnerId]
 				,[ParentHouseholdId]
@@ -138,7 +145,7 @@ BEGIN
 	IF @Id IS NOT NULL BEGIN
 		
 		IF NOT EXISTS (SELECT [Id] FROM [BankAccounts] WHERE [Id] = @Id) THROW 51000, 'The Bank Account Id provided returned no records', 1;
-		IF NOT (SELECT [ParentHouseholdId] FROM [BankAccounts] WHERE [Id] = @Id) != (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId) THROW 51000, 'You must be a member of the household to view this account.', 1;
+		IF NOT (SELECT [ParentHouseholdId] FROM [BankAccounts] WHERE [Id] = @Id) = @houseId THROW 51000, 'You must be a member of the household to view this account.', 1;
 
 		SELECT [Id]
 				,[OwnerId]
@@ -294,8 +301,8 @@ GO
 -- Description:	Delete an existing category.
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[Category_Delete]
-	@Id int,
-	@Secret nvarchar(max)
+	@Secret nvarchar(max),
+	@Id int
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -319,8 +326,8 @@ GO
 -- Description:	Edit an existing account that belongs to a household the user is a member of.
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[Category_Edit]
-	@Id int,
 	@Secret nvarchar(max),
+	@Id int,
 	@NewName nvarchar(25),
 	@NewDescription nvarchar(500)
 AS
@@ -410,8 +417,8 @@ GO
 -- Description:	Delete an existing subcategory.
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[CategoryItem_Delete]
-	@Id int,
-	@Secret nvarchar(max)
+	@Secret nvarchar(max),
+	@Id int
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -441,8 +448,8 @@ GO
 -- Description:	Edit an existing category item that belongs to a household the user is a member of.
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[CategoryItem_Edit]
-	@Id int,
 	@Secret nvarchar(max),
+	@Id int,
 	@NewName nvarchar(25),
 	@NewDescription nvarchar(500),
 	@NewBudget decimal(18, 2),
@@ -519,9 +526,9 @@ GO
 -- Description:	Create new Household, and assign it to a user.
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[Household_Create]
+	@Secret nvarchar(max),
 	@Name nvarchar(25),
-	@Greeting nvarchar(255),
-	@Secret nvarchar(max)
+	@Greeting nvarchar(255)
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -552,8 +559,8 @@ GO
 -- Description:	Delete an existing household.
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[Household_Delete]
-	@Id int,
-	@Secret nvarchar(max)
+	@Secret nvarchar(max),
+	@Id int
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -576,8 +583,8 @@ GO
 -- Description:	Modify details of an existing household.
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[Household_Edit]
-	@Id int,
 	@Secret nvarchar(max),
+	@Id int,
 	@newName nvarchar(25) = NULL,
 	@newGreeting nvarchar(255) = NULL
 AS
@@ -654,7 +661,7 @@ CREATE OR ALTER  PROCEDURE [dbo].[Transaction_Create]
 	@OccuredAt datetime,
 	@ParentAccountId int,
 	@TransactionTypeId int,
-	@CategoryItemId int
+	@CategoryItemId int = null
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -671,7 +678,7 @@ BEGIN
 		THROW 51000, 'The parent bank account ID provided does not exist.', 1; 
 	IF NOT EXISTS (SELECT [Id] FROM [TransactionTypes] WHERE [Id] = @TransactionTypeId) 
 		THROW 51000, 'The transaction type ID provided does not exist.', 1; 
-	IF NOT EXISTS (SELECT [Id] FROM [CategoryItems] WHERE [Id] = @CategoryItemId) 
+	IF @CategoryItemId IS NOT NULL AND NOT EXISTS (SELECT [Id] FROM [CategoryItems] WHERE [Id] = @CategoryItemId) 
 		THROW 51000, 'The category item ID provided does not exist.', 1; 
 
 	DECLARE @now datetime = (SELECT GETDATE());
@@ -689,11 +696,11 @@ BEGIN
 
 	SET NOCOUNT OFF;
 	INSERT INTO [Transactions]
-	VALUES(@ParentAccountId, @TransactionTypeId, @CategoryItemId, @CreatorId, @Name, @Memo, @Amount, @OccuredAt, @now)
+	VALUES(@ParentAccountId, @TransactionTypeId, @CategoryItemId, @CreatorId, @Name, @Memo, @Amount, @OccuredAt, @now);
 
 
-
-	RETURN @@ROWCOUNT;
+	SELECT [Id]
+	FROM [Transactions] WHERE [CreatedAt] = @now AND [OwnerId] = @CreatorId
 END
 GO
 -- =============================================
@@ -703,8 +710,8 @@ GO
 -- Description:	Delete an existing transaction.
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[Transaction_Delete]
-	@Id int,
-	@Secret nvarchar(max)
+	@Secret nvarchar(max),
+	@Id int
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -713,9 +720,7 @@ BEGIN
 	DECLARE @CallerId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
 
 	IF NOT EXISTS (SELECT [Id] FROM [Transactions] WHERE [Id] = @Id) 
-		THROW 51000, 'The transaction id provided returned no records', 1;	 	
-	
-
+		THROW 51000, 'The transaction id provided returned no records', 1;	 
 
 	DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId);
 	DECLARE @transHouseId int = (SELECT h.[Id] FROM [Transactions] t LEFT JOIN [BankAccounts] b ON t.[ParentAccountId] = b.[Id]
@@ -723,8 +728,6 @@ BEGIN
 																	 WHERE t.[Id] = @Id);
 	IF @houseId != @transHouseId 
 		THROW 51000, 'The transaction does not belong to the household of the caller.', 1; 
-
-
 
 	DECLARE @houseOwner nvarchar(max) = (SELECT h.[CreatorId] FROM [Transactions] t LEFT JOIN [BankAccounts] b ON t.[ParentAccountId] = b.[Id]
 																					LEFT JOIN [Households] h ON b.[ParentHouseholdId] = h.[Id]
@@ -740,6 +743,7 @@ BEGIN
 		
 	SET NOCOUNT OFF;
 	DELETE FROM [Transactions] WHERE [Id] = @Id;
+
 	
 	RETURN @@ROWCOUNT;
 END
@@ -751,15 +755,15 @@ GO
 -- Description:	Edit an existing transaction.
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[Transaction_Edit]
-	@Id int,
 	@Secret nvarchar(max),
-	@NewName nvarchar(45),
-	@NewMemo nvarchar(120),
-	@NewAmount decimal(18, 2),
-	@NewOccuredAt datetime,
-	@NewParentAccountId int,
-	@NewTransactionTypeId int,
-	@NewCategoryItemId int
+	@Id int,
+	@NewName nvarchar(45) = NULL,
+	@NewMemo nvarchar(120) = NULL,
+	@NewAmount decimal(18, 2) = NULL,
+	@NewOccuredAt datetime = NULL,
+	@NewParentAccountId int = NULL,
+	@NewTransactionTypeId int = NULL,
+	@NewCategoryItemId int = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -769,15 +773,25 @@ BEGIN
 			
 	IF NOT EXISTS (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret) THROW 51000, 'Bad API secret.', 1;
 	DECLARE @CallerId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
+	DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId);
 
 	IF (CASE WHEN (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId) IS NULL THEN 1 ELSE 0 END) = 1 
 		THROW 51000, 'The user editing this transaction does not belong to a household.', 1; 		
 	IF @NewParentAccountId IS NOT NULL AND NOT EXISTS (SELECT [Id] FROM [BankAccounts] WHERE [Id] = @NewParentAccountId) 
 		THROW 51000, 'The new parent bank account ID provided does not exist.', 1; 
+	IF (SELECT [ParentHouseholdId] FROM [BankAccounts] WHERE [Id] = @NewParentAccountId) != @houseId
+		THROW 51000, 'The new parent bank account does not belong to the household of the caller.', 1; 		
 	IF @NewTransactionTypeId IS NOT NULL AND NOT EXISTS (SELECT [Id] FROM [TransactionTypes] WHERE [Id] = @NewTransactionTypeId) 
 		THROW 51000, 'The new transaction type ID provided does not exist.', 1; 
-	IF @NewCategoryItemId IS NOT NULL AND NOT EXISTS (SELECT [Id] FROM [CategoryItems] WHERE [Id] = @NewCategoryItemId) 
-		THROW 51000, 'The new category item ID provided does not exist.', 1; 
+	IF @NewCategoryItemId != 0 AND @NewCategoryItemId IS NOT NULL AND NOT EXISTS (SELECT [Id] FROM [CategoryItems] WHERE [Id] = @NewCategoryItemId) 
+		THROW 51000, 'The new category item ID provided does not exist.', 1;
+	IF @NewCategoryItemId < 0
+		THROW 51000,'Invalid Category Item Selection: Category item ID must be 0 (clear category), or greater than 0 (subcategory id).', 1;
+	IF (SELECT c.[ParentHouseholdId] FROM [CategoryItems] ci 
+		LEFT JOIN [Categories] c ON ci.[ParentCategoryId] = c.[Id]
+		WHERE ci.[Id] = @NewCategoryItemId) != @houseId
+		THROW 51000, 'The new subcategory does not belong to the household of the caller.', 1; 	
+
 	 
 	 
 	DECLARE @houseOwner nvarchar(max) = (SELECT h.[CreatorId] FROM [Transactions] t LEFT JOIN [BankAccounts] b ON t.[ParentAccountId] = b.[Id]
@@ -789,7 +803,7 @@ BEGIN
 	IF @houseOwner != @CallerId AND @accOwner != @CallerId AND @transOwner != @CallerId
 		THROW 51000, 'Only the owner of the household, bank account, or the transaction may edit transaction records.', 1;
 
-
+	
 
 	DECLARE @oldName nvarchar(25);
 	DECLARE @oldMemo nvarchar(500);
@@ -828,11 +842,75 @@ BEGIN
 	IF @NewTransactionTypeId IS NOT NULL AND @NewTransactionTypeId != @oldTransTypeId 
 	UPDATE [Transactions] SET [TransactionTypeId] = @NewTransactionTypeId WHERE [Id] = @Id;
 
-	IF @NewCategoryItemId IS NOT NULL AND @NewCategoryItemId != @oldCategoryItemId
+	IF @NewCategoryItemId IS NOT NULL AND @NewCategoryItemId != 0 AND  @NewCategoryItemId != @oldCategoryItemId
 	UPDATE [Transactions] SET [CategoryItemId] = @NewCategoryItemId WHERE [Id] = @Id;
+
+	IF @NewCategoryItemId = 0
+	UPDATE [Transactions] SET [CategoryItemId] = NULL WHERE [Id] = @Id;
 
 
 	RETURN @@ROWCOUNT;
+END
+GO
+-- =============================================
+-- Author:		Matthew Wendel
+-- Create date: 6/19/2020 4:06PM
+-- Update date: 6/25/2020 2:20PM
+-- Description:	Fetch details of an transaction.
+-- =============================================
+CREATE OR ALTER  PROCEDURE [dbo].[Transaction_Fetch]
+	@Secret nvarchar(max),
+	@Id int = null,
+	@Mine bit = 0
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF NOT EXISTS (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret) THROW 51000, 'Bad API Secret.', 1;
+	DECLARE @CallerId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
+	DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId);
+	IF @houseId IS NULL  THROW 51000, 'You must be a member of a household to view transactions.', 1;
+
+	IF @Id IS NULL BEGIN
+		SELECT t.[Id]
+			  ,t.[ParentAccountId]
+			  ,t.[TransactionTypeId]
+			  ,t.[CategoryItemId]
+			  ,t.[OwnerId]
+			  ,t.[Name]
+			  ,t.[Memo]
+			  ,t.[Amount]
+			  ,t.[OccuredAt]
+			  ,t.[CreatedAt]
+		FROM [Transactions] t
+		LEFT JOIN [BankAccounts] ba ON t.[ParentAccountId] = ba.[Id]		
+		WHERE (CASE WHEN @Mine = 1 AND t.[OwnerId] = @CallerId THEN 1
+				    WHEN @Mine = 0 AND ba.[ParentHouseholdId] = @houseId THEN 1
+					ELSE 0 END
+			  ) = 1
+	END
+
+	IF @Id IS NOT NULL BEGIN
+		
+		IF NOT EXISTS (SELECT [Id] FROM [Transactions] WHERE [Id] = @Id) THROW 51000, 'The Bank Account Id provided returned no records', 1;
+		IF NOT (SELECT ba.[ParentHouseholdId] FROM [Transactions] t
+				LEFT JOIN [BankAccounts] ba ON t.[ParentAccountId] = ba.[Id]
+				WHERE t.[Id] = @Id) = @houseId OR
+		   NOT (SELECT [OwnerId] FROM [Transactions] WHERE [Id] = @Id) = @CallerId THROW 51000, 'You must be the owner or a member of the household view this transaction.', 1;
+
+		SELECT [Id]
+			  ,[ParentAccountId]
+			  ,[TransactionTypeId]
+			  ,[CategoryItemId]
+			  ,[OwnerId]
+			  ,[Name]
+			  ,[Memo]
+			  ,[Amount]
+			  ,[OccuredAt]
+			  ,[CreatedAt]
+		FROM [Transactions] WHERE [Id] = @Id
+	END
+
+	
 END
 GO
 
