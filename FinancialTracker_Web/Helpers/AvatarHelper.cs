@@ -38,7 +38,7 @@ namespace FinancialTracker_Web.Helpers
                 //if save was successful, return path of saved file.
                 return AVATAR_DIRECTORY + fileNameModded; ;
 
-            } catch( Exception ex ) {
+            } catch {
                 return null;
             }
         }

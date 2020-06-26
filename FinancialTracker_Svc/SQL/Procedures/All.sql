@@ -490,7 +490,7 @@ GO
 -- =============================================
 -- Author:		Matthew Wendel
 -- Create date: 6/19/2020 3:50PM
--- Update date: 6/24/2020 4:26PM
+-- Update date: 6/24/2020 5:47PM
 -- Description:	Create new Household, and assign it to a user.
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[Household_Create]
@@ -508,14 +508,16 @@ DECLARE @now datetime = GETDATE();
 	INSERT INTO [Households]
 	VALUES(@Name, @Greeting, @now, @CreatorId)
 	
-	SET NOCOUNT OFF;
 	UPDATE [AspNetUsers]
 	SET [HouseholdId] = (SELECT [Id] FROM [Households] WHERE [Name] = @Name AND
 															 [Greeting] = @Greeting AND
 															 [CreatedAt] = @now AND
 															 [CreatorId] = @CreatorId);
 
-	RETURN @@ROWCOUNT
+	SELECT [Id] FROM [Households] WHERE [Name] = @Name AND
+										[Greeting] = @Greeting AND
+										[CreatedAt] = @now AND
+										[CreatorId] = @CreatorId;
 END
 GO
 -- =============================================
@@ -534,8 +536,9 @@ BEGIN
 	DECLARE @CallerId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
 	IF NOT EXISTS (SELECT [Id] FROM [Households] WHERE [Id] = @Id) THROW 51000, 'The Household Id provided returned no records', 1;
 	IF ((CASE WHEN (SELECT [CreatorId] FROM [Households] WHERE [Id] = @Id) != @CallerId THEN 1 ELSE 0 END) = 1)  THROW 51000, 'The user calling this action is not the owner, and cannot delete the household.', 1;
-
+	
 	SET NOCOUNT OFF;
+	UPDATE [AspNetUsers] SET [HouseholdId] = NULL WHERE [HouseholdId] = @Id;
 	DELETE FROM [Households] WHERE [Id] = @Id;
 	
 	return @@ROWCOUNT;
@@ -570,8 +573,7 @@ BEGIN
 	UPDATE [Households] SET [Name] = @newName WHERE [Id] = @Id;
 
 	IF DATALENGTH(@newGreeting) !=0 AND @newGreeting != @oldGreeting 
-	UPDATE [Households] SET [Greeting] = @newGreeting WHERE [Id] = @Id;
-	
+	UPDATE [Households] SET [Greeting] = @newGreeting WHERE [Id] = @Id;	
 
 	RETURN @@ROWCOUNT
 END
