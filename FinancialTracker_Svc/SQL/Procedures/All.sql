@@ -111,26 +111,48 @@ GO
 -- Description:	Fetch details of an bank account.
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[BankAccount_Fetch]
-	@Id int,
+	@Id int = null,
 	@Secret nvarchar(max)
 AS
 BEGIN
 	SET NOCOUNT ON;
-	IF NOT EXISTS (SELECT [Id] FROM [BankAccounts] WHERE [Id] = @Id) THROW 51000, 'The Bank Account Id provided returned no records', 1;
 	IF NOT EXISTS (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret) THROW 51000, 'Bad API Secret.', 1;
 	DECLARE @CallerId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
-	IF NOT (SELECT [ParentHouseholdId] FROM [BankAccounts] WHERE [Id] = @Id) != (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId) THROW 51000, 'You must be a member of the household to view this account.', 1;
 
-	SELECT [Id]
-				 ,[OwnerId]
-				 ,[ParentHouseholdId]
-				 ,[AccountTypeId]
-				 ,[AccountName]
-				 ,[CreatedAt]
-				 ,[ModifiedAt]
-				 ,[StartingBalance]
-				 ,[LowBalanceAlertThreshold]
-	FROM [BankAccounts] WHERE [Id] = @Id
+	IF @Id IS NULL BEGIN
+		DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId);
+		IF @houseId IS NULL  THROW 51000, 'You must be a member of a household to view accounts.', 1;
+
+		SELECT [Id]
+				,[OwnerId]
+				,[ParentHouseholdId]
+				,[AccountTypeId]
+				,[AccountName]
+				,[CreatedAt]
+				,[ModifiedAt]
+				,[StartingBalance]
+				,[LowBalanceAlertThreshold]
+		FROM [BankAccounts] WHERE [ParentHouseholdId] = @houseId
+	END
+
+	IF @Id IS NOT NULL BEGIN
+		
+		IF NOT EXISTS (SELECT [Id] FROM [BankAccounts] WHERE [Id] = @Id) THROW 51000, 'The Bank Account Id provided returned no records', 1;
+		IF NOT (SELECT [ParentHouseholdId] FROM [BankAccounts] WHERE [Id] = @Id) != (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId) THROW 51000, 'You must be a member of the household to view this account.', 1;
+
+		SELECT [Id]
+				,[OwnerId]
+				,[ParentHouseholdId]
+				,[AccountTypeId]
+				,[AccountName]
+				,[CreatedAt]
+				,[ModifiedAt]
+				,[StartingBalance]
+				,[LowBalanceAlertThreshold]
+		FROM [BankAccounts] WHERE [Id] = @Id
+	END
+
+	
 END
 GO
 
@@ -211,22 +233,40 @@ GO
 -- Description:	Fetch details of an bank account type.
 -- =============================================
 CREATE OR ALTER  PROCEDURE [dbo].[BankAccountType_Fetch]
-	@Id int
+	@Id int = null
 AS
 BEGIN
 	SET NOCOUNT ON;
-	IF NOT EXISTS (SELECT [Id] FROM [BankAccounts] WHERE [Id] = @Id) THROW 51000, 'The Bank Account Id provided returned no records', 1;
 
-	RETURN SELECT [Id]
-				 ,[OwnerId]
-				 ,[ParentHouseholdId]
-				 ,[AccountTypeId]
-				 ,[AccountName]
-				 ,[CreatedAt]
-				 ,[ModifiedAt]
-				 ,[StartingBalance]
-				 ,[LowBalanceAlertThreshold]
-	FROM [BankAccounts] WHERE [Id] = @Id
+	IF @Id IS NULL BEGIN
+
+		SELECT [Id]
+					 ,[OwnerId]
+					 ,[ParentHouseholdId]
+					 ,[AccountTypeId]
+					 ,[AccountName]
+					 ,[CreatedAt]
+					 ,[ModifiedAt]
+					 ,[StartingBalance]
+					 ,[LowBalanceAlertThreshold]
+		FROM [BankAccounts]
+	END
+
+	IF @Id IS NOT NULL BEGIN
+		IF NOT EXISTS (SELECT [Id] FROM [BankAccounts] WHERE [Id] = @Id) THROW 51000, 'The Bank Account Id provided returned no records', 1;
+
+		SELECT [Id]
+					 ,[OwnerId]
+					 ,[ParentHouseholdId]
+					 ,[AccountTypeId]
+					 ,[AccountName]
+					 ,[CreatedAt]
+					 ,[ModifiedAt]
+					 ,[StartingBalance]
+					 ,[LowBalanceAlertThreshold]
+		FROM [BankAccounts] WHERE [Id] = @Id
+
+	END
 END
 GO
 
