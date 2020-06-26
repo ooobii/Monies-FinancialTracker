@@ -177,6 +177,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\SwashbuckleAddon_OrderControllers.cs" />
     <Compile Include="Helpers\Util.cs" />
     <Compile Include="Models\ApiDbContext.cs" />
     <Compile Include="Models\BankAccount.cs" />

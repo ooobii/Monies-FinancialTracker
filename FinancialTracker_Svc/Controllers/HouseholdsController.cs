@@ -9,14 +9,17 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using FinancialTracker_Svc.Models;
 using Newtonsoft.Json;
+using Swashbuckle.Swagger.Annotations;
 using static FinancialTracker_Svc.Helpers.Util;
 
 namespace FinancialTracker_Svc.Controllers
 {
+    [SwaggerControllerOrder(0)]
     public class HouseholdsController : ApiController
     {
-        private ApiDbContext db = new ApiDbContext();
+        private const string FRIENDLY_CONTROLLER_NAME = "Households";
 
+        private ApiDbContext db = new ApiDbContext();
 
         [Route("Households")]
         [HttpGet]
