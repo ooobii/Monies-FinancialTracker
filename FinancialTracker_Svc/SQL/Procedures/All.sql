@@ -191,13 +191,14 @@ BEGIN
 	SET NOCOUNT ON;
 	
 	IF NOT EXISTS (SELECT [Id] FROM [BankAccountTypes] WHERE [Id] = @Id) THROW 51000, 'The ID provided did not locate a bank account type.', 1;
-	
+	IF EXISTS (SELECT [Id] FROM [BankAccounts] WHERE [AccountTypeId] = @Id) THROW 51000, 'The Bank Account Type cannot be deleted, as it is still in use.', 1;
+
+
 	DELETE FROM [BankAccountTypes] WHERE [Id] = @Id;
 	
 	RETURN @@ROWCOUNT;
 END
 GO
-
 -- =============================================
 -- Author:		Matthew Wendel
 -- Create date:	6/24/2020 4:32PM
@@ -211,7 +212,7 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 	
-	IF EXISTS (SELECT [Id] FROM [BankAccountTypes] WHERE [Id] = @Id) THROW 51000, 'The ID provided did not locate a bank account type.', 1;
+	IF NOT EXISTS (SELECT [Id] FROM [BankAccountTypes] WHERE [Id] = @Id) THROW 51000, 'The ID provided did not locate a bank account type.', 1;
 	IF EXISTS (SELECT [Name] FROM [BankAccountTypes] WHERE [Name] = @NewName)  THROW 51000, 'A bank account type with the new name provided already exists.', 1; 
 	
 
@@ -219,6 +220,7 @@ BEGIN
 	SELECT @oldName = [Name]
 	FROM [BankAccountTypes] WHERE [Id] = @Id
 
+	SET NOCOUNT OFF;
 	IF DATALENGTH(@NewName) != 0 AND @NewName != @oldName
 	UPDATE [BankAccountTypes] SET [Name] = @NewName WHERE [Id] = @Id;
 
@@ -240,31 +242,14 @@ BEGIN
 
 	IF @Id IS NULL BEGIN
 
-		SELECT [Id]
-					 ,[OwnerId]
-					 ,[ParentHouseholdId]
-					 ,[AccountTypeId]
-					 ,[AccountName]
-					 ,[CreatedAt]
-					 ,[ModifiedAt]
-					 ,[StartingBalance]
-					 ,[LowBalanceAlertThreshold]
-		FROM [BankAccounts]
+		SELECT [Id], [Name] FROM [BankAccountTypes]
+
 	END
 
 	IF @Id IS NOT NULL BEGIN
-		IF NOT EXISTS (SELECT [Id] FROM [BankAccounts] WHERE [Id] = @Id) THROW 51000, 'The Bank Account Id provided returned no records', 1;
-
-		SELECT [Id]
-					 ,[OwnerId]
-					 ,[ParentHouseholdId]
-					 ,[AccountTypeId]
-					 ,[AccountName]
-					 ,[CreatedAt]
-					 ,[ModifiedAt]
-					 ,[StartingBalance]
-					 ,[LowBalanceAlertThreshold]
-		FROM [BankAccounts] WHERE [Id] = @Id
+		IF NOT EXISTS (SELECT [Id] FROM [BankAccountTypes] WHERE [Id] = @Id) THROW 51000, 'The Bank Account Type Id provided returned no records', 1;
+		
+		SELECT [Id], [Name] FROM [BankAccountTypes] WHERE [Id] = @Id
 
 	END
 END
