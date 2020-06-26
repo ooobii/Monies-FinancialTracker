@@ -480,6 +480,8 @@
     <Content Include="Views\Account\ConfirmationSent.cshtml" />
     <Content Include="Views\Account\ResendEmailConfirmation.cshtml" />
     <Content Include="Views\Shared\_TopNav.cshtml" />
+    <Content Include="Views\Households\_HouseholdDeleteButton.cshtml" />
+    <Content Include="Views\Households\_HouseholdLeaveButton.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

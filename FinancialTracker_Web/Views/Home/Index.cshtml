@@ -68,8 +68,16 @@
                 <div class="card-body">
                     <div class="row row-cols-1">
                         @if( Model.Household != null && Model.Household.CreatorId == User.Identity.GetUserId() ) {
-                            <div class="col">
+                            <div class="col pt-1 pb-1">
                                 @Html.Partial("~/Views/Households/_HouseholdEditButton.cshtml", Model.Household)
+                            </div>
+                            <div class="col pt-1 pb-1">
+                                @Html.Partial("~/Views/Households/_HouseholdDeleteButton.cshtml", Model.Household)
+                            </div>
+                        }
+                        @if( Model.Household != null  ) {
+                            <div class="col pt-1 pb-1">
+                                @Html.Partial("~/Views/Households/_HouseholdLeaveButton.cshtml", Model.Household)
                             </div>
                         }
                     </div>

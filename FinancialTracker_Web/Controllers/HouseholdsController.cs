@@ -32,6 +32,7 @@ namespace FinancialTracker_Web.Controllers
 
                 db.Households.Add(household);
                 db.SaveChanges();
+                TempData.Add("alertSuccessHouseholdCreated", $"The '{household.Name}' household has been created, and you have been added to the household!");
                 return RedirectToAction("Index", "Home");
             }
             return RedirectToAction("Details");
@@ -46,6 +47,7 @@ namespace FinancialTracker_Web.Controllers
                     house.Name = model.Name;
                     house.Greeting = model.Greeting;
                     db.SaveChanges();
+                    TempData.Add("alertSuccessHouseholdEdited", "Changes to household saved!");
                 }
             }
             return returnUrl == null ? RedirectToAction("Details", "Households") : RedirectToLocal(returnUrl, RedirectToAction("Details", "Households"));
@@ -60,6 +62,7 @@ namespace FinancialTracker_Web.Controllers
                 household.Categories.Clear();
                 db.Households.Remove(household);
                 db.SaveChanges();
+                TempData.Add("alertSuccessHouseholdDeleted", "The household was successfully deleted.");
             }
             return RedirectToAction("Index", "Home");
         }
@@ -89,6 +92,31 @@ namespace FinancialTracker_Web.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        [HttpPost]
+        public ActionResult Leave() {
+            if(!Request.IsAuthenticated) {
+                TempData.Add("alertDangerNoUser", "You cannot leave a household if you are not logged in.");
+                return RedirectToAction("Index", "Home");
+            }
+            var houseId = db.Users.Find(User.Identity.GetUserId()).HouseholdId;
+            if( houseId == null) {
+                TempData.Add("alertDangerNoHousehold", "You must be a member of a household in order to leave one.");
+                return RedirectToAction("Index", "Home");
+            }
+            if( db.Households.Find(houseId).CreatorId == User.Identity.GetUserId() ) {
+                TempData.Add("alertDangerNoHousehold", "You cannot leave a household if you are the only member left.");
+                return RedirectToAction("Index", "Home");
+            }
+            if(db.Households.Find(houseId).Members.Count <= 1) {
+                TempData.Add("alertDangerNoHousehold", "You cannot leave a household if you are the only member left.");
+                return RedirectToAction("Index", "Home");
+            }
+
+            db.Users.Find(User.Identity.GetUserId()).HouseholdId = null;
+            db.SaveChanges();
+            TempData.Add("alertSuccessLeftHousehold", "You have successfully left the household!");
+            return RedirectToAction("Index", "Home");
+        }
 
 
 

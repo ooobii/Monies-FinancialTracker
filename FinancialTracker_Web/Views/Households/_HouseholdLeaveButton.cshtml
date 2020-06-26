@@ -1,0 +1,37 @@
+﻿@using FinancialTracker_Web.Models
+@using Microsoft.AspNet.Identity
+
+@model Household
+    @{
+        var id = Model.Id;
+    }@if( Request.RawUrl != "/" ) {
+         <button id="exitHousehold_btn" type="button" class="btn btn-sm btn-outline-info btn-popover">Leave Household</button>
+     } else {
+         <button id="exitHousehold_btn" type="button" class="btn btn-block btn-info btn-popover">Leave Household</button>
+     }
+<div id="exitHousehold_form" style="display:none">
+    @using( Html.BeginForm("Leave", "Households", FormMethod.Post) ) {
+
+        <div class="row row-cols-1">
+            <div class="col pb-2 mb-2 border-bottom">
+                <p>Your data will not be deleted, but you will be unable to access it until you are re-invited back into the household.</p>
+                <p>Are you sure you want to continue?</p>
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-block btn-warning">Leave Household</button>
+            </div>
+        </div>
+    }
+</div>
+
+
+<script>
+    $('#exitHousehold_btn').popover({
+        placement: 'left',
+        title: 'Leave @Model.Name?',
+        html: true,
+        sanitize: false,
+        content: $('#exitHousehold_form').html()
+    });
+
+</script>
