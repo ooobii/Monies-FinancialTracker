@@ -276,12 +276,28 @@ namespace FinancialTracker_Web.Controllers
                     return View("ForgotPasswordConfirmation");
                 }
 
-                // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
-                // Send an email with this link
-                // string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
-                // var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                // await UserManager.SendEmailAsync(user.Id, "Reset Password", "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>");
-                // return RedirectToAction("ForgotPasswordConfirmation", "Account");
+                string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
+                var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+
+                try {
+                    var from = new System.Net.Mail.MailAddress(WebConfigurationManager.AppSettings[ "emailsvcusr" ], WebConfigurationManager.AppSettings[ "emailsvcdisplay" ]);
+                    var emailMsg = new MailMessage(from.ToString(), user.Email) {
+                        Subject = "Monies: Reset Password Confirmation Email",
+                        Body = $"<p>To reset your account, please <a href=\"{callbackUrl}\">click here</a>!</p>",
+                        IsBodyHtml = true
+                    };
+
+                    var emailSvc = new EmailService();
+                    await emailSvc.SendAsync(emailMsg);
+
+                    TempData.Add("EmailSentTo", user.Email);
+                    return RedirectToAction("ForgotPasswordConfirmation", "Account");
+                } catch( Exception ex ) {
+                    Console.WriteLine(ex.ToString());
+                    await Task.FromResult(0);
+                }
+
+                return RedirectToAction("ForgotPasswordConfirmation", "Account");
             }
 
             // If we got this far, something failed, redisplay form
