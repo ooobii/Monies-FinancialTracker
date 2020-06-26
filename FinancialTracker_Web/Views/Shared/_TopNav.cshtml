@@ -92,23 +92,23 @@
                         @usr.GetGreeting()
                     </a>
                     <ul aria-labelledby="dropdownSubMenu3" class="dropdown-menu border-0 shadow">
-                        @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new {
+                        @using( Html.BeginForm("LogOff", "Account", FormMethod.Post, new {
                             id = "logoutForm"
-                        })) {
+                        }) ) {
                             @Html.AntiForgeryToken()
-                            <a href="javascript:document.getElementById('logoutForm').submit()">
-                                <li class="dropdown-item">
+                            <li class="dropdown-item">
+                                <a href="javascript:document.getElementById('logoutForm').submit()">
                                     <i class="dropdown-icon fas fa-sign-out-alt"></i>
                                     Log off
-                                </li>
-                            </a>
+                                </a>
+                            </li>
                         }
                         <li class="dropdown-divider"></li>
-                        <a href="@Url.Action("Index", "Manage")">
-                            <li class="dropdown-item">
+                        <li class="dropdown-item">
+                            <a href="@Url.Action("Index", "Manage")">
                                 <i class="dropdown-icon fas fa-cogs"></i>Manage Account
-                            </li>
-                        </a>
+                            </a>
+                        </li>
                     </ul>
                 </li>
             }
