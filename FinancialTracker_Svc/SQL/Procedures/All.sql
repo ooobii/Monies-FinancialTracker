@@ -281,7 +281,7 @@ BEGIN
 	IF NOT EXISTS (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret) THROW 51000, 'Bad API secret', 1; 
 	DECLARE @CreatorId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
 
-	IF (CASE WHEN (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CreatorId) IS NULL THEN 1 ELSE 0 END) = 1 THROW 51000, 'The user creating this account does not belong to a household.', 1;  
+	IF (CASE WHEN (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CreatorId) IS NULL THEN 1 ELSE 0 END) = 1 THROW 51000, 'The user creating this category does not belong to a household.', 1;  
 
 	DECLARE @now datetime = GETDATE();
 	DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CreatorId);
@@ -291,7 +291,7 @@ BEGIN
 	VALUES(@houseId, @Name, @Description, @now)
 
 
-	return @@ROWCOUNT;
+	SELECT [Id] FROM [Categories] WHERE [CreatedAt] = @now AND [Name] = @Name AND [Description] = @Description
 END
 GO
 -- =============================================
@@ -308,7 +308,7 @@ BEGIN
 	SET NOCOUNT ON;
 	IF NOT EXISTS (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret) THROW 51000, 'Bad API secret.', 1;
 	DECLARE @CallerId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
-IF NOT EXISTS (SELECT [Id] FROM [Categories] WHERE [Id] = @Id) THROW 51000, 'The category Id provided returned no records', 1;	 
+	IF NOT EXISTS (SELECT [Id] FROM [Categories] WHERE [Id] = @Id) THROW 51000, 'The category Id provided returned no records', 1;	 
 	
 	DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId);
 	IF (CASE WHEN (SELECT [ParentHouseholdId] FROM [Categories] WHERE [Id] = @Id) != @houseId THEN 1 ELSE 0 END) = 1 THROW 51000, 'The user removing this category does not belong to the parent household.', 1; 
@@ -328,8 +328,8 @@ GO
 CREATE OR ALTER  PROCEDURE [dbo].[Category_Edit]
 	@Secret nvarchar(max),
 	@Id int,
-	@NewName nvarchar(25),
-	@NewDescription nvarchar(500)
+	@NewName nvarchar(25) = NULL,
+	@NewDescription nvarchar(500) = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -361,6 +361,50 @@ BEGIN
 	return @@ROWCOUNT;
 END
 GO
+-- =============================================
+-- Author:		Matthew Wendel
+-- Create date: 6/19/2020 4:06PM
+-- Update date: 6/25/2020 2:20PM
+-- Description:	Fetch details of a category.
+-- =============================================
+CREATE OR ALTER  PROCEDURE [dbo].[Category_Fetch]
+	@Secret nvarchar(max),
+	@Id int = null
+AS
+BEGIN
+	SET NOCOUNT ON;
+	IF NOT EXISTS (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret) THROW 51000, 'Bad API Secret.', 1;
+	DECLARE @CallerId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
+	DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId);
+	IF @houseId IS NULL  THROW 51000, 'You must be a member of a household to view categories.', 1;
+
+	IF @Id IS NULL BEGIN
+		SELECT [Id]
+			  ,[ParentHouseholdId]
+			  ,[Name]
+			  ,[Description]
+			  ,[CreatedAt]
+		FROM [Categories] WHERE [ParentHouseholdId] = @houseId
+	END
+
+	IF @Id IS NOT NULL BEGIN
+		
+		IF NOT EXISTS (SELECT [Id] FROM [Categories] WHERE [Id] = @Id) THROW 51000, 'The Category Id provided returned no records', 1;
+		IF NOT (SELECT [ParentHouseholdId] FROM [Categories] WHERE [Id] = @Id) = @houseId THROW 51000, 'You must be a member of the household to view this category.', 1;
+
+		SELECT [Id]
+			  ,[ParentHouseholdId]
+			  ,[Name]
+			  ,[Description]
+			  ,[CreatedAt]
+		FROM [Categories] WHERE [Id] = @Id
+	END
+
+	
+END
+GO
+
+
 
 
 
@@ -384,7 +428,7 @@ BEGIN
 		THROW 51000, 'The budget for a subcategory must be greater than or equal to 0.', 1;  
 
 	IF NOT EXISTS (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret) 
-		THROW 51000, 'The CreatorId provided does not exist as a UserId.', 1;	
+		THROW 51000, 'Bad API secret', 1;	
 	DECLARE @CreatorId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
 
 	IF (CASE WHEN (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CreatorId) IS NULL THEN 1 ELSE 0 END) = 1 
@@ -406,8 +450,7 @@ BEGIN
 	VALUES(@ParentCategoryId, @Name, @Description, @Budget)
 
 
-
-	return @@ROWCOUNT;
+	SELECT [Id] FROM [CategoryItems] WHERE [ParentCategoryId] = @ParentCategoryId AND [Name] = @Name AND [Description] = @Description
 END
 GO
 -- =============================================
@@ -423,17 +466,17 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 	IF NOT EXISTS (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret) 
-		THROW 51000, 'The CreatorId provided does not exist as a UserId.', 1;	
+		THROW 51000, 'Bad API secret', 1;	
 	DECLARE @CallerId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
 
 	IF NOT EXISTS (SELECT [Id] FROM [CategoryItems] WHERE [Id] = @Id) 
-		THROW 51000, 'The category item Id provided returned no records', 1;	 	
+		THROW 51000, 'The subcategory Id provided returned no records', 1;	 	
 
 
 	DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId);
 	DECLARE @categoryHouseId int = (SELECT c.[ParentHouseholdId] FROM [CategoryItems] ci LEFT JOIN [Categories] c ON ci.[ParentCategoryId] = c.[Id] WHERE ci.[Id] = @Id);
 	IF @houseId != @categoryHouseId 
-		THROW 51000, 'The parent category does not belong to the household of the creator.', 1; 
+		THROW 51000, 'You must be a member of the parent household in order to delete this subcategory.', 1; 
 
 	SET NOCOUNT OFF;
 	DELETE FROM [CategoryItems] WHERE [Id] = @Id;
@@ -462,7 +505,7 @@ BEGIN
 		THROW 51000, 'The budget for a subcategory must be greater than or equal to 0.', 1; 
 		
 	IF NOT EXISTS (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret) 
-		THROW 51000, 'The CreatorId provided does not exist as a UserId.', 1;	
+		THROW 51000, 'Bad API secret', 1;	
 	DECLARE @CallerId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
 
 	IF NOT EXISTS (SELECT [Id] FROM [CategoryItems] WHERE [Id] = @Id) 
@@ -514,6 +557,66 @@ BEGIN
 
 
 	RETURN @@ROWCOUNT;
+END
+GO
+-- =============================================
+-- Author:		Matthew Wendel
+-- Create date: 6/19/2020 4:06PM
+-- Update date: 6/25/2020 2:20PM
+-- Description:	Fetch details of a subcategory.
+-- =============================================
+CREATE OR ALTER  PROCEDURE [dbo].[CategoryItem_Fetch]
+	@Secret nvarchar(max),
+	@Id int = NULL,
+	@CategoryId int = NULL
+AS
+BEGIN
+	SET NOCOUNT ON;	
+	IF @Id IS NULL AND @CategoryId IS NULL
+		THROW 51000, 'Invalid ID Selections: You must enter a Category ID or SubCategory ID.', 1;
+	IF @Id IS NOT NULL AND @CategoryId IS NOT NULL 
+		THROW 51000, 'Invalid ID Selections: You can only enter a Category ID or a SubCategory ID; not both.', 1;
+	IF NOT EXISTS (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret)
+		THROW 51000, 'Bad API Secret.', 1;
+
+	DECLARE @CallerId nvarchar(max) = (SELECT [Id] FROM [AspNetUsers] WHERE [ApiSecret] = @Secret);
+	DECLARE @houseId int = (SELECT [HouseholdId] FROM [AspNetUsers] WHERE [Id] = @CallerId);
+	IF @houseId IS NULL 
+		THROW 51000, 'You must be a member of a household to view subcategories.', 1;
+
+
+	IF @Id IS NULL AND @CategoryId IS NOT NULL BEGIN
+		IF NOT EXISTS (SELECT [Id] FROM [Categories] WHERE [Id] = @CategoryId)
+			THROW 51000, 'The category Id provided returned no records', 1;
+
+		IF (SELECT [ParentHouseholdId] FROM [Categories] WHERE [Id] = @CategoryId) != @houseId 
+			THROW 51000, 'You must be a member of a household to view this category.', 1;
+
+		SELECT [Id]
+			  ,[ParentCategoryId]
+			  ,[Name]
+			  ,[Description]
+			  ,[AmountBudgeted]
+		FROM [CategoryItems] ci WHERE [ParentCategoryId] = @CategoryId
+
+	END
+
+	IF @Id IS NOT NULL AND @CategoryId IS NULL BEGIN
+		
+		IF NOT EXISTS (SELECT [Id] FROM [CategoryItems] WHERE [Id] = @Id) THROW 51000, 'The subcategory Id provided returned no records', 1;
+		IF (SELECT c.[ParentHouseholdId] FROM [CategoryItems] ci
+			LEFT JOIN [Categories] c ON ci.[ParentCategoryId] = c.[Id]
+			WHERE ci.[Id] = @Id) != @houseId
+		THROW 51000, 'The caller user does not belong to the household of this category.', 1;
+
+		SELECT [Id]
+			  ,[ParentCategoryId]
+			  ,[Name]
+			  ,[Description]
+			  ,[AmountBudgeted]
+		FROM [CategoryItems] WHERE [Id] = @Id
+	END
+
 END
 GO
 

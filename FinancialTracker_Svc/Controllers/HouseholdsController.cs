@@ -17,7 +17,6 @@ namespace FinancialTracker_Svc.Controllers
     [SwaggerControllerOrder(0)]
     public class HouseholdsController : ApiController
     {
-        private const string FRIENDLY_CONTROLLER_NAME = "Households";
 
         private ApiDbContext db = new ApiDbContext();
 
@@ -27,10 +26,10 @@ namespace FinancialTracker_Svc.Controllers
             return await db.GetHouseholds();
         }
 
-        [Route("Household/{HouseholdId}")]
+        [Route("Household/{id}")]
         [HttpGet]
-        public async Task<Household> Household(int HouseholdId) {
-            return await db.GetHousehold(HouseholdId);
+        public async Task<Household> Household(int id) {
+            return await db.GetHousehold(id);
         }
 
         [Route("Household/Create")]
@@ -39,16 +38,16 @@ namespace FinancialTracker_Svc.Controllers
             return await db.CreateHousehold(GetApiKeyFromRequest(Request), Name, Greeting);
         }
 
-        [Route("Household/{HouseholdId}/edit")]
+        [Route("Household/{id}/edit")]
         [HttpPatch]
-        public async Task<Household> Household_Edit(int HouseholdId, string NewName = null, string NewGreeting = null) {
-            return await db.EditHousehold(GetApiKeyFromRequest(Request), HouseholdId, NewName, NewGreeting);
+        public async Task<Household> Household_Edit(int id, string NewName = null, string NewGreeting = null) {
+            return await db.EditHousehold(GetApiKeyFromRequest(Request), id, NewName, NewGreeting);
         }
 
-        [Route("Household/{HouseholdId}/delete")]
+        [Route("Household/{id}/delete")]
         [HttpDelete]
-        public async Task<ResultSet> Household_Delete(int HouseholdId) {
-            return await db.DeleteHousehold(GetApiKeyFromRequest(Request), HouseholdId);
+        public async Task<ResultSet> Household_Delete(int id) {
+            return await db.DeleteHousehold(GetApiKeyFromRequest(Request), id);
         }
     }
 }

@@ -336,6 +336,188 @@ namespace FinancialTracker_Svc.Models
         }
 
 
+        //Categories(3)
+        public async Task<CategoriesContainer> GetCategories(string secret) {
+            return new CategoriesContainer(await Database.SqlQuery<Category>("exec Category_Fetch @Secret", new SqlParameter("@Secret", secret)).ToListAsync());
+        }
+        public async Task<Category> GetCategory(string secret, int id) {
+            try {
+                return await Database.SqlQuery<Category>("exec Category_Fetch @Secret, @id",
+                    new SqlParameter("@Secret", secret),
+                    new SqlParameter("@id", id)).FirstOrDefaultAsync();
+            } catch( SqlException sqlex ) {
+                throw _errDatabaseMsg(sqlex);
+
+            } catch( Exception ex ) {
+                throw _errGeneralException(ex);
+            }
+
+        }
+        public async Task<Category> CreateCategory(string secret, string name, string description) {
+            try {
+                var transId = await Database.SqlQuery<int>("exec Category_Create @Secret, @Name, @Description",
+                                                                 new SqlParameter("@Secret", secret),
+                                                                 new SqlParameter("@Name", name),
+                                                                 new SqlParameter("@Description", description)).FirstOrDefaultAsync();
+                if( transId < 1 ) {
+                    throw _errNoChange();
+                }
+                return await GetCategory(secret, transId);
+
+            } catch( SqlException sqlex ) {
+                throw _errDatabaseMsg(sqlex);
+
+            } catch( HttpResponseException ) {
+                throw;
+
+            } catch( Exception ex ) {
+                throw _errGeneralException(ex);
+            }
+        }
+        public async Task<Category> EditCategory(string secret, int id, string name = null, string description = null) {
+            try {
+
+                var rows = await Database.ExecuteSqlCommandAsync("exec Category_Edit @Secret, @Id, @NewName, @NewDescription",
+                                                                 new SqlParameter("@Secret", secret),
+                                                                 new SqlParameter("@Id", id),
+                                                                 new SqlParameter("@NewName", (object)name ?? DBNull.Value),
+                                                                 new SqlParameter("@NewDescription", (object)description ?? DBNull.Value));
+                if( rows < 0 ) {
+                    throw _errNoChange();
+                }
+
+                return await GetCategory(secret, id);
+
+            } catch( SqlException sqlex ) {
+                throw _errDatabaseMsg(sqlex);
+
+            } catch( HttpResponseException ) {
+                throw;
+
+            } catch( Exception ex ) {
+                throw _errGeneralException(ex);
+            }
+        }
+        public async Task<ResultSet> DeleteCategory(string secret, int id) {
+            Database.BeginTransaction();
+            try {
+                var rows = await Database.ExecuteSqlCommandAsync("exec Category_Delete @Secret, @Id",
+                                                                 new SqlParameter("@Id", id),
+                                                                 new SqlParameter("@Secret", secret));
+                if( rows < 1 ) {
+                    Database.CurrentTransaction?.Rollback();
+                    throw _errNoChange();
+                }
+
+
+                Database.CurrentTransaction.Commit();
+                return new ResultSet(false, 0, "Categories Deleted Successfully.", id);
+
+            } catch( SqlException sqlex ) {
+                Database.CurrentTransaction?.Rollback();
+                throw _errDatabaseMsg(sqlex);
+
+            } catch( HttpResponseException ) {
+                throw;
+
+            } catch( Exception ex ) {
+                throw _errGeneralException(ex);
+            }
+        }
+
+
+        //Category Items(4)
+        public async Task<CategoryItemsContainer> GetCategoryItems(string secret, int? id = null, int? categoryId = null) {
+            try {
+                return new CategoryItemsContainer(await Database.SqlQuery<CategoryItem>("exec CategoryItem_Fetch @Secret, @Id, @CategoryId",
+                    new SqlParameter("@Secret", secret),
+                    new SqlParameter("@Id", id != null ? (object)id.Value : DBNull.Value),
+                    new SqlParameter("@CategoryId", categoryId != null ? (object)categoryId.Value : DBNull.Value)).ToListAsync());
+
+            } catch( SqlException sqlex ) {
+                throw _errDatabaseMsg(sqlex);
+
+            } catch( Exception ex ) {
+                throw _errGeneralException(ex);
+            }
+
+        }
+        public async Task<CategoryItemsContainer> CreateCategoryItem(string secret, string name, string description, decimal monthBudget, int parentCategoryId) {
+            try {
+                var ciId = await Database.SqlQuery<int>("exec CategoryItem_Create @Secret, @Name, @Description, @Budget, @ParentCategoryId",
+                                                                 new SqlParameter("@Secret", secret),
+                                                                 new SqlParameter("@Name", name),
+                                                                 new SqlParameter("@Description", description),
+                                                                 new SqlParameter("@Budget", monthBudget),
+                                                                 new SqlParameter("@ParentCategoryId", parentCategoryId)).FirstOrDefaultAsync();
+                if( ciId < 1 ) {
+                    throw _errNoChange();
+                }
+                return await GetCategoryItems(secret, id: ciId);
+
+            } catch( SqlException sqlex ) {
+                throw _errDatabaseMsg(sqlex);
+
+            } catch( HttpResponseException ) {
+                throw;
+
+            } catch( Exception ex ) {
+                throw _errGeneralException(ex);
+            }
+        }
+        public async Task<CategoryItemsContainer> EditCategoryItem(string secret, int id, string name = null, string description = null, decimal? monthBudget = null, int? parentCategoryId = null) {
+            try {
+
+                var rows = await Database.ExecuteSqlCommandAsync("exec CategoryItem_Edit @Secret, @Id, @NewName, @NewDescription, @NewBudget, @NewParentCategoryId",
+                                                                 new SqlParameter("@Secret", secret),
+                                                                 new SqlParameter("@Id", id),
+                                                                 new SqlParameter("@NewName", (object)name ?? DBNull.Value),
+                                                                 new SqlParameter("@NewDescription", (object)description ?? DBNull.Value),
+                                                                 new SqlParameter("@NewBudget", monthBudget != null ? (object)monthBudget.Value : DBNull.Value),
+                                                                 new SqlParameter("@NewParentCategoryId", parentCategoryId != null ? (object)parentCategoryId.Value : DBNull.Value));
+                if( rows < 0 ) {
+                    throw _errNoChange();
+                }
+
+                return await GetCategoryItems(secret, id: id);
+
+            } catch( SqlException sqlex ) {
+                throw _errDatabaseMsg(sqlex);
+
+            } catch( HttpResponseException ) {
+                throw;
+
+            } catch( Exception ex ) {
+                throw _errGeneralException(ex);
+            }
+        }
+        public async Task<ResultSet> DeleteCategoryItem(string secret, int id) {
+            Database.BeginTransaction();
+            try {
+                var rows = await Database.ExecuteSqlCommandAsync("exec CategoryItem_Delete @Secret, @Id",
+                                                                 new SqlParameter("@Id", id),
+                                                                 new SqlParameter("@Secret", secret));
+                if( rows < 1 ) {
+                    Database.CurrentTransaction?.Rollback();
+                    throw _errNoChange();
+                }
+
+
+                Database.CurrentTransaction.Commit();
+                return new ResultSet(false, 0, "CategoryItems Deleted Successfully.", id);
+
+            } catch( SqlException sqlex ) {
+                Database.CurrentTransaction?.Rollback();
+                throw _errDatabaseMsg(sqlex);
+
+            } catch( HttpResponseException ) {
+                throw;
+
+            } catch( Exception ex ) {
+                throw _errGeneralException(ex);
+            }
+        }
+
 
 
 
